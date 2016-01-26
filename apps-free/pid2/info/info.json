@@ -1,0 +1,6 @@
+{
+    "name": "2. PID",
+    "version": "0.94-BUILD_NUMBER",
+    "revision": "REVISION",
+    "description": "2x2 MIMO PID controller with automatic reset, 2. integrator, output offset and limiting"
+}
