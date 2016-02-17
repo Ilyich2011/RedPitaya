@@ -41,15 +41,16 @@ typedef struct rp_osc_meas_res_s {
     float avg;
     float freq;
     float period;
-    float p;		// bar graph -------- Fenske
+    float p;		     // bar graph ---------------------------- Fenske
     float i;
     float d;
     float o;
+    float min_intensity; // min_intensity value from XADC -------- Fenske
 } rp_osc_meas_res_t;
 
 /* Parameters indexes - these defines should be in the same order as 
  * rp_app_params_t structure defined in main.c */
-#define PARAMS_NUM        118 // changed by Fenske-------------------------------------------------------------------
+#define PARAMS_NUM        122 // changed by Fenske-------------------------------------------------------------------
 #define MIN_GUI_PARAM     0
 #define MAX_GUI_PARAM     1
 #define TRIG_MODE_PARAM   2
@@ -167,19 +168,23 @@ typedef struct rp_osc_meas_res_s {
 
 #define OUT_1_OFFSET	  105
 #define OUT_2_OFFSET	  106
+#define MIN_I_THRESHOLD_1 107
+#define MIN_I_THRESHOLD_2 108
+#define MIN_INTENS_1      109
+#define MIN_INTENS_2      110
 
-#define MEAS_P_CH1        107 //------ bar graph Fenske
-#define MEAS_I_CH1        108
-#define MEAS_D_CH1        109
-#define MEAS_O_CH1        110
-#define MEAS_P_CH2        111 //------ bar graph Fenske
-#define MEAS_I_CH2        112
-#define MEAS_D_CH2        113
-#define MEAS_O_CH2        114
+#define MEAS_P_CH1        111 //------ bar graph Fenske
+#define MEAS_I_CH1        112
+#define MEAS_D_CH1        113
+#define MEAS_O_CH1        114
+#define MEAS_P_CH2        115 //------ bar graph Fenske
+#define MEAS_I_CH2        116
+#define MEAS_D_CH2        117
+#define MEAS_O_CH2        118
 
-#define ROT_ENCODER	      115
-#define SAVE_SETTINGS	  116
-#define LOAD_SETTINGS	  117
+#define ROT_ENCODER	      119
+#define SAVE_SETTINGS	  120
+#define LOAD_SETTINGS	  121
 
 /* Defines from which parameters on are AWG parameters (used in set_param() to
  * trigger update only on needed part - either Oscilloscope, AWG or PID */

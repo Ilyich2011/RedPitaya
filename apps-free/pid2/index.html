@@ -18,7 +18,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>2. PID controller</title>
+  <title>2. PID Controller</title>
   <link href="../assets/bootstrap-3.0.0/css/bootstrap.css" rel="stylesheet" type="text/css">
   <link href="../assets/examples.css" rel="stylesheet" type="text/css">
   <link href="../assets/style.css?6" rel="stylesheet" type="text/css"> 
@@ -63,9 +63,8 @@
   var time_range_max = [130, 1000, 8, 130, 1, 8];
   var range_steps = [0.5, 1, 2, 5, 10, 20, 50, 100];
 
-   // Changed by Fenske (colour channel3 added) ---------------------------------------------------------------------------
   var plot_options = {
-    colors: ['#3276B1', '#D2322D', '#009900', '#00CC99'],    // channel1, channel2, trigger, channel3 line
+    colors: ['#3276B1', '#D2322D', '#009900'],    
     lines: { lineWidth: 1 },
     selection: { mode: 'xy' },
     zoom: { interactive: true, trigger: null },
@@ -366,6 +365,13 @@
       .on('focus paste', function() {
         $(this).parent().addClass('input-group');
         $('#apply_pid_11_gain').show();
+		$(this).bind('mousewheel', function(event, delta) {
+			if(delta > 0)
+				params.local.pid_11_gain += 0.01;
+			else
+				params.local.pid_11_gain -= 0.01;	
+			return false;
+		})
       })
       .on('blur', function() {
         $('#apply_pid_11_gain').hide();
@@ -380,6 +386,7 @@
           $(this).val(params.local.pid_11_gain)
         }
         user_editing = false;
+		$(this).unbind('mousewheel');
       })
       .on('change', function() {
         $(this).blur();
@@ -390,11 +397,19 @@
         }
       });
 	  
+	  
     // PID 11 Setpoint, Kp, Ki, Kd
     $('#pid_11_sp')
       .on('focus paste', function() {
         $(this).parent().addClass('input-group');
         $('#apply_pid_11_sp').show();
+		$(this).bind('mousewheel', function(event, delta) {
+			if(delta > 0)
+				params.local.pid_11_sp += 0.01;
+			else
+				params.local.pid_11_sp -= 0.01;;	
+			return false;
+		})
       })
       .on('blur', function() {
         $('#apply_pid_11_sp').hide();
@@ -409,6 +424,7 @@
           $(this).val(params.local.pid_11_sp)
         }
         user_editing = false;
+		$(this).unbind('mousewheel');
       })
       .on('change', function() {
         $(this).blur();
@@ -416,13 +432,20 @@
       .on('keypress', function(e) {
         if(e.keyCode == 13) {
           $(this).blur();
-        }
+        }			
       });
 
     $('#pid_11_kp')
       .on('focus paste', function() {
         $(this).parent().addClass('input-group');
         $('#apply_pid_11_kp').show();
+		$(this).bind('mousewheel', function(event, delta) {
+			if(delta > 0)
+				params.local.pid_11_kp += 0.01;
+			else
+				params.local.pid_11_kp -= 0.01;	
+			return false;
+		})
       })
       .on('blur', function() {
         $('#apply_pid_11_kp').hide();
@@ -437,6 +460,7 @@
           $(this).val(params.local.pid_11_kp)
         }
         user_editing = false;
+		$(this).unbind('mousewheel');
       })
       .on('change', function() {
         $(this).blur();
@@ -451,6 +475,13 @@
       .on('focus paste', function() {
         $(this).parent().addClass('input-group');
         $('#apply_pid_11_ki').show();
+		$(this).bind('mousewheel', function(event, delta) {
+			if(delta > 0)
+				params.local.pid_11_ki += 0.5;
+			else
+				params.local.pid_11_ki -= 0.5;	
+			return false;
+		})
       })
       .on('blur', function() {
         $('#apply_pid_11_ki').hide();
@@ -465,6 +496,7 @@
           $(this).val(params.local.pid_11_ki)
         }
         user_editing = false;
+		$(this).unbind('mousewheel');
       })
       .on('change', function() {
         $(this).blur();
@@ -472,13 +504,20 @@
       .on('keypress', function(e) {
         if(e.keyCode == 13) {
           $(this).blur();
-        }
+        }	
       });
 
     $('#pid_11_kd')
       .on('focus paste', function() {
         $(this).parent().addClass('input-group');
         $('#apply_pid_11_kd').show();
+		$(this).bind('mousewheel', function(event, delta) {
+			if(delta > 0)
+				params.local.pid_11_kd += 0.01;
+			else
+				params.local.pid_11_kd -= 0.01;	
+			return false;
+		})
       })
       .on('blur', function() {
         $('#apply_pid_11_kd').hide();
@@ -493,6 +532,7 @@
           $(this).val(params.local.pid_11_kd)
         }
         user_editing = false;
+		$(this).unbind('mousewheel');
       })
       .on('change', function() {
         $(this).blur();
@@ -500,7 +540,7 @@
       .on('keypress', function(e) {
         if(e.keyCode == 13) {
           $(this).blur();
-        }
+        }	
       });
 	  
 	  <!--- Button for Limit added by Fenske ------------------->
@@ -508,6 +548,13 @@
       .on('focus paste', function() {
         $(this).parent().addClass('input-group');
         $('#apply_pid_11_limit_up').show();
+		$(this).bind('mousewheel', function(event, delta) {
+			if(delta > 0)
+				params.local.pid_11_limit_up += 0.01;
+			else
+				params.local.pid_11_limit_up -= 0.01;	
+			return false;
+		})
       })
       .on('blur', function() {
         $('#apply_pid_11_limit_up').hide();
@@ -522,6 +569,7 @@
           $(this).val(params.local.pid_11_limit_up)
         }
         user_editing = false;
+		$(this).unbind('mousewheel');
       })
       .on('change', function() {
         $(this).blur();
@@ -536,6 +584,13 @@
       .on('focus paste', function() {
         $(this).parent().addClass('input-group');
         $('#apply_pid_11_limit_low').show();
+		$(this).bind('mousewheel', function(event, delta) {
+			if(delta > 0)
+				params.local.pid_11_limit_low += 0.01;
+			else
+				params.local.pid_11_limit_low -= 0.01;	
+			return false;
+		})
       })
       .on('blur', function() {
         $('#apply_pid_11_limit_low').hide();
@@ -550,6 +605,7 @@
           $(this).val(params.local.pid_11_limit_low)
         }
         user_editing = false;
+		$(this).unbind('mousewheel');
       })
       .on('change', function() {
         $(this).blur();
@@ -564,6 +620,13 @@
       .on('focus paste', function() {
         $(this).parent().addClass('input-group');
         $('#apply_pid_11_int_limit').show();
+		$(this).bind('mousewheel', function(event, delta) {
+			if(delta > 0)
+				params.local.pid_11_int_limit += 0.01;
+			else
+				params.local.pid_11_int_limit -= 0.01;	
+			return false;
+		})
       })
       .on('blur', function() {
         $('#apply_pid_11_int_limit').hide();
@@ -578,6 +641,7 @@
           $(this).val(params.local.pid_11_int_limit)
         }
         user_editing = false;
+		$(this).unbind('mousewheel');
       })
       .on('change', function() {
         $(this).blur();
@@ -592,6 +656,13 @@
       .on('focus paste', function() {
         $(this).parent().addClass('input-group');
         $('#apply_pid_11_kii').show();
+		$(this).bind('mousewheel', function(event, delta) {
+			if(delta > 0)
+				params.local.pid_11_kii += 0.5;
+			else
+				params.local.pid_11_kii -= 0.5;	
+			return false;
+		})
       })
       .on('blur', function() {
         $('#apply_pid_11_kii').hide();
@@ -606,6 +677,7 @@
           $(this).val(params.local.pid_11_kii)
         }
         user_editing = false;
+		$(this).unbind('mousewheel');
       })
       .on('change', function() {
         $(this).blur();
@@ -613,7 +685,7 @@
       .on('keypress', function(e) {
         if(e.keyCode == 13) {
           $(this).blur();
-        }
+        }	
       });
 <!-------Buttons for PID12 and PID21 deleted and added again by Fenske --------------------------------------------------------------------------------->
 
@@ -622,6 +694,13 @@
       .on('focus paste', function() {
         $(this).parent().addClass('input-group');
         $('#apply_pid_12_gain').show();
+		$(this).bind('mousewheel', function(event, delta) {
+			if(delta > 0)
+				params.local.pid_12_gain += 0.01;
+			else
+				params.local.pid_12_gain -= 0.01;
+			return false;
+		})
       })
       .on('blur', function() {
         $('#apply_pid_12_gain').hide();
@@ -636,6 +715,7 @@
           $(this).val(params.local.pid_12_gain)
         }
         user_editing = false;
+		$(this).unbind('mousewheel');
       })
       .on('change', function() {
         $(this).blur();
@@ -643,7 +723,7 @@
       .on('keypress', function(e) {
         if(e.keyCode == 13) {
           $(this).blur();
-        }
+        }	
       });
 	  
     // PID 12 Setpoint, Kp, Ki, Kd
@@ -651,6 +731,13 @@
       .on('focus paste', function() {
         $(this).parent().addClass('input-group');
         $('#apply_pid_12_sp').show();
+		$(this).bind('mousewheel', function(event, delta) {
+			if(delta > 0)
+				params.local.pid_12_sp += 0.01;
+			else
+				params.local.pid_12_sp -= 0.01;	
+			return false;
+		})
       })
       .on('blur', function() {
         $('#apply_pid_12_sp').hide();
@@ -665,6 +752,7 @@
           $(this).val(params.local.pid_12_sp)
         }
         user_editing = false;
+		$(this).unbind('mousewheel');
       })
       .on('change', function() {
         $(this).blur();
@@ -672,13 +760,20 @@
       .on('keypress', function(e) {
         if(e.keyCode == 13) {
           $(this).blur();
-        }
+        }	
       });
 
     $('#pid_12_kp')
       .on('focus paste', function() {
         $(this).parent().addClass('input-group');
         $('#apply_pid_12_kp').show();
+		$(this).bind('mousewheel', function(event, delta) {
+			if(delta > 0)
+				params.local.pid_12_kp += 0.01;
+			else
+				params.local.pid_12_kp -= 0.01;	
+			return false;
+		})
       })
       .on('blur', function() {
         $('#apply_pid_12_kp').hide();
@@ -693,6 +788,7 @@
           $(this).val(params.local.pid_12_kp)
         }
         user_editing = false;
+		$(this).unbind('mousewheel');
       })
       .on('change', function() {
         $(this).blur();
@@ -707,6 +803,13 @@
       .on('focus paste', function() {
         $(this).parent().addClass('input-group');
         $('#apply_pid_12_ki').show();
+		$(this).bind('mousewheel', function(event, delta) {
+			if(delta > 0)
+				params.local.pid_12_ki += 0.5;
+			else
+				params.local.pid_12_ki -= 0.5;
+			return false;
+		})
       })
       .on('blur', function() {
         $('#apply_pid_12_ki').hide();
@@ -721,6 +824,7 @@
           $(this).val(params.local.pid_12_ki)
         }
         user_editing = false;
+		$(this).unbind('mousewheel');
       })
       .on('change', function() {
         $(this).blur();
@@ -728,13 +832,20 @@
       .on('keypress', function(e) {
         if(e.keyCode == 13) {
           $(this).blur();
-        }
+        }	
       });
 
     $('#pid_12_kd')
       .on('focus paste', function() {
         $(this).parent().addClass('input-group');
         $('#apply_pid_12_kd').show();
+		$(this).bind('mousewheel', function(event, delta) {
+			if(delta > 0)
+				params.local.pid_12_kd += 0.01;
+			else
+				params.local.pid_12_kd -= 0.01;	
+			return false;
+		})
       })
       .on('blur', function() {
         $('#apply_pid_12_kd').hide();
@@ -749,6 +860,7 @@
           $(this).val(params.local.pid_12_kd)
         }
         user_editing = false;
+		$(this).unbind('mousewheel');
       })
       .on('change', function() {
         $(this).blur();
@@ -756,7 +868,7 @@
       .on('keypress', function(e) {
         if(e.keyCode == 13) {
           $(this).blur();
-        }
+        }	
       });
 	  
 	  <!--- Button for Limit added by Fenske ------------------->
@@ -764,6 +876,13 @@
       .on('focus paste', function() {
         $(this).parent().addClass('input-group');
         $('#apply_pid_12_limit_up').show();
+		$(this).bind('mousewheel', function(event, delta) {
+			if(delta > 0)
+				params.local.pid_12_limit_up += 0.01;
+			else
+				params.local.pid_12_limit_up -= 0.01;	
+			return false;
+		})
       })
       .on('blur', function() {
         $('#apply_pid_12_limit_up').hide();
@@ -778,6 +897,7 @@
           $(this).val(params.local.pid_12_limit_up)
         }
         user_editing = false;
+		$(this).unbind('mousewheel');
       })
       .on('change', function() {
         $(this).blur();
@@ -792,6 +912,13 @@
       .on('focus paste', function() {
         $(this).parent().addClass('input-group');
         $('#apply_pid_12_limit_low').show();
+		$(this).bind('mousewheel', function(event, delta) {
+			if(delta > 0)
+				params.local.pid_12_limit_low += 0.01;
+			else
+				params.local.pid_12_limit_low -= 0.01;	
+			return false;
+		})
       })
       .on('blur', function() {
         $('#apply_pid_12_limit_low').hide();
@@ -806,6 +933,7 @@
           $(this).val(params.local.pid_12_limit_low)
         }
         user_editing = false;
+		$(this).unbind('mousewheel');
       })
       .on('change', function() {
         $(this).blur();
@@ -820,6 +948,13 @@
       .on('focus paste', function() {
         $(this).parent().addClass('input-group');
         $('#apply_pid_12_int_limit').show();
+		$(this).bind('mousewheel', function(event, delta) {
+			if(delta > 0)
+				params.local.pid_12_int_limit += 0.01;
+			else
+				params.local.pid_12_int_limit -= 0.01;	
+			return false;
+		})
       })
       .on('blur', function() {
         $('#apply_pid_12_int_limit').hide();
@@ -834,6 +969,7 @@
           $(this).val(params.local.pid_12_int_limit)
         }
         user_editing = false;
+		$(this).unbind('mousewheel');
       })
       .on('change', function() {
         $(this).blur();
@@ -848,6 +984,13 @@
       .on('focus paste', function() {
         $(this).parent().addClass('input-group');
         $('#apply_pid_12_kii').show();
+		$(this).bind('mousewheel', function(event, delta) {
+			if(delta > 0)
+				params.local.pid_12_kii += 0.5;
+			else
+				params.local.pid_12_kii -= 0.5;	
+			return false;
+		})
       })
       .on('blur', function() {
         $('#apply_pid_12_kii').hide();
@@ -862,6 +1005,7 @@
           $(this).val(params.local.pid_12_kii)
         }
         user_editing = false;
+		$(this).unbind('mousewheel');
       })
       .on('change', function() {
         $(this).blur();
@@ -869,7 +1013,7 @@
       .on('keypress', function(e) {
         if(e.keyCode == 13) {
           $(this).blur();
-        }
+        }	
       });
 	  
 // PID 21 Gain -------------------------------------------------------- added by Fenske
@@ -877,6 +1021,13 @@
       .on('focus paste', function() {
         $(this).parent().addClass('input-group');
         $('#apply_pid_21_gain').show();
+		$(this).bind('mousewheel', function(event, delta) {
+			if(delta > 0)
+				params.local.pid_21_gain += 0.01;
+			else
+				params.local.pid_21_gain -= 0.01;	
+			return false;
+		})
       })
       .on('blur', function() {
         $('#apply_pid_21_gain').hide();
@@ -891,6 +1042,7 @@
           $(this).val(params.local.pid_21_gain)
         }
         user_editing = false;
+		$(this).unbind('mousewheel');
       })
       .on('change', function() {
         $(this).blur();
@@ -898,7 +1050,7 @@
       .on('keypress', function(e) {
         if(e.keyCode == 13) {
           $(this).blur();
-        }
+        }	
       });
 	  
     // PID 21 Setpoint, Kp, Ki, Kd
@@ -906,6 +1058,13 @@
       .on('focus paste', function() {
         $(this).parent().addClass('input-group');
         $('#apply_pid_21_sp').show();
+		$(this).bind('mousewheel', function(event, delta) {
+			if(delta > 0)
+				params.local.pid_21_sp += 0.01;
+			else
+				params.local.pid_21_sp -= 0.01;	
+			return false;
+		})
       })
       .on('blur', function() {
         $('#apply_pid_21_sp').hide();
@@ -920,6 +1079,7 @@
           $(this).val(params.local.pid_21_sp)
         }
         user_editing = false;
+		$(this).unbind('mousewheel');
       })
       .on('change', function() {
         $(this).blur();
@@ -934,6 +1094,13 @@
       .on('focus paste', function() {
         $(this).parent().addClass('input-group');
         $('#apply_pid_21_kp').show();
+		$(this).bind('mousewheel', function(event, delta) {
+			if(delta > 0)
+				params.local.pid_21_kp += 0.01;
+			else
+				params.local.pid_21_kp -= 0.01;	
+			return false;
+		})
       })
       .on('blur', function() {
         $('#apply_pid_21_kp').hide();
@@ -948,6 +1115,7 @@
           $(this).val(params.local.pid_21_kp)
         }
         user_editing = false;
+		$(this).unbind('mousewheel');
       })
       .on('change', function() {
         $(this).blur();
@@ -955,13 +1123,20 @@
       .on('keypress', function(e) {
         if(e.keyCode == 13) {
           $(this).blur();
-        }
+        }	
       });
 
     $('#pid_21_ki')
       .on('focus paste', function() {
         $(this).parent().addClass('input-group');
         $('#apply_pid_21_ki').show();
+		$(this).bind('mousewheel', function(event, delta) {
+			if(delta > 0)
+				params.local.pid_21_ki += 0.5;
+			else
+				params.local.pid_21_ki -= 0.5;	
+			return false;
+		})
       })
       .on('blur', function() {
         $('#apply_pid_21_ki').hide();
@@ -976,6 +1151,7 @@
           $(this).val(params.local.pid_21_ki)
         }
         user_editing = false;
+		$(this).unbind('mousewheel');
       })
       .on('change', function() {
         $(this).blur();
@@ -983,13 +1159,20 @@
       .on('keypress', function(e) {
         if(e.keyCode == 13) {
           $(this).blur();
-        }
+        }	
       });
 
     $('#pid_21_kd')
       .on('focus paste', function() {
         $(this).parent().addClass('input-group');
         $('#apply_pid_21_kd').show();
+		$(this).bind('mousewheel', function(event, delta) {
+			if(delta > 0)
+				params.local.pid_21_kd += 0.01;
+			else
+				params.local.pid_21_kd -= 0.01;	
+			return false;
+		})
       })
       .on('blur', function() {
         $('#apply_pid_21_kd').hide();
@@ -1004,6 +1187,7 @@
           $(this).val(params.local.pid_21_kd)
         }
         user_editing = false;
+		$(this).unbind('mousewheel');
       })
       .on('change', function() {
         $(this).blur();
@@ -1011,7 +1195,7 @@
       .on('keypress', function(e) {
         if(e.keyCode == 13) {
           $(this).blur();
-        }
+        }	
       });
 	  
 	  <!--- Button for Limit added by Fenske ------------------->
@@ -1019,6 +1203,13 @@
       .on('focus paste', function() {
         $(this).parent().addClass('input-group');
         $('#apply_pid_21_limit_up').show();
+		$(this).bind('mousewheel', function(event, delta) {
+			if(delta > 0)
+				params.local.pid_21_limit_up += 0.01;
+			else
+				params.local.pid_21_limit_up -= 0.01;	
+			return false;
+		})
       })
       .on('blur', function() {
         $('#apply_pid_21_limit_up').hide();
@@ -1033,6 +1224,7 @@
           $(this).val(params.local.pid_21_limit_up)
         }
         user_editing = false;
+		$(this).unbind('mousewheel');
       })
       .on('change', function() {
         $(this).blur();
@@ -1047,6 +1239,13 @@
       .on('focus paste', function() {
         $(this).parent().addClass('input-group');
         $('#apply_pid_21_limit_low').show();
+		$(this).bind('mousewheel', function(event, delta) {
+			if(delta > 0)
+				params.local.pid_21_limit_low += 0.01;
+			else
+				params.local.pid_21_limit_low -= 0.01;	
+			return false;
+		})
       })
       .on('blur', function() {
         $('#apply_pid_21_limit_low').hide();
@@ -1061,6 +1260,7 @@
           $(this).val(params.local.pid_21_limit_low)
         }
         user_editing = false;
+		$(this).unbind('mousewheel');
       })
       .on('change', function() {
         $(this).blur();
@@ -1075,6 +1275,13 @@
       .on('focus paste', function() {
         $(this).parent().addClass('input-group');
         $('#apply_pid_21_int_limit').show();
+		$(this).bind('mousewheel', function(event, delta) {
+			if(delta > 0)
+				params.local.pid_21_int_limit += 0.01;
+			else
+				params.local.pid_21_int_limit -= 0.01;	
+			return false;
+		})
       })
       .on('blur', function() {
         $('#apply_pid_21_int_limit').hide();
@@ -1089,6 +1296,7 @@
           $(this).val(params.local.pid_21_int_limit)
         }
         user_editing = false;
+		$(this).unbind('mousewheel');
       })
       .on('change', function() {
         $(this).blur();
@@ -1103,6 +1311,13 @@
       .on('focus paste', function() {
         $(this).parent().addClass('input-group');
         $('#apply_pid_21_kii').show();
+		$(this).bind('mousewheel', function(event, delta) {
+			if(delta > 0)
+				params.local.pid_21_kii += 0.5;
+			else
+				params.local.pid_21_kii -= 0.5;	
+			return false;
+		})
       })
       .on('blur', function() {
         $('#apply_pid_21_kii').hide();
@@ -1117,6 +1332,7 @@
           $(this).val(params.local.pid_21_kii)
         }
         user_editing = false;
+		$(this).unbind('mousewheel');
       })
       .on('change', function() {
         $(this).blur();
@@ -1132,6 +1348,13 @@
       .on('focus paste', function() {
         $(this).parent().addClass('input-group');
         $('#apply_pid_22_gain').show();
+		$(this).bind('mousewheel', function(event, delta) {
+			if(delta > 0)
+				params.local.pid_22_gain += 0.01;
+			else
+				params.local.pid_22_gain -= 0.01;	
+			return false;
+		})
       })
       .on('blur', function() {
         $('#apply_pid_22_gain').hide();
@@ -1146,6 +1369,7 @@
           $(this).val(params.local.pid_22_gain)
         }
         user_editing = false;
+		$(this).unbind('mousewheel');
       })
       .on('change', function() {
         $(this).blur();
@@ -1161,6 +1385,13 @@
       .on('focus paste', function() {
         $(this).parent().addClass('input-group');
         $('#apply_pid_22_sp').show();
+		$(this).bind('mousewheel', function(event, delta) {
+			if(delta > 0)
+				params.local.pid_22_sp += 0.01;
+			else
+				params.local.pid_22_sp -= 0.01;	
+			return false;
+		})
       })
       .on('blur', function() {
         $('#apply_pid_22_sp').hide();
@@ -1175,6 +1406,7 @@
           $(this).val(params.local.pid_22_sp)
         }
         user_editing = false;
+		$(this).unbind('mousewheel');
       })
       .on('change', function() {
         $(this).blur();
@@ -1182,13 +1414,20 @@
       .on('keypress', function(e) {
         if(e.keyCode == 13) {
           $(this).blur();
-        }
+        }	
       });
 
     $('#pid_22_kp')
       .on('focus paste', function() {
         $(this).parent().addClass('input-group');
         $('#apply_pid_22_kp').show();
+		$(this).bind('mousewheel', function(event, delta) {
+			if(delta > 0)
+				params.local.pid_22_kp += 0.01;
+			else
+				params.local.pid_22_kp -= 0.01;	
+			return false;
+		})
       })
       .on('blur', function() {
         $('#apply_pid_22_kp').hide();
@@ -1203,6 +1442,7 @@
           $(this).val(params.local.pid_22_kp)
         }
         user_editing = false;
+		$(this).unbind('mousewheel');
       })
       .on('change', function() {
         $(this).blur();
@@ -1210,13 +1450,20 @@
       .on('keypress', function(e) {
         if(e.keyCode == 13) {
           $(this).blur();
-        }
+        }	
       });
 
     $('#pid_22_ki')
       .on('focus paste', function() {
         $(this).parent().addClass('input-group');
         $('#apply_pid_22_ki').show();
+		$(this).bind('mousewheel', function(event, delta) {
+			if(delta > 0)
+				params.local.pid_22_ki += 0.5;
+			else
+				params.local.pid_22_ki -= 0.5;	
+			return false;
+		})
       })
       .on('blur', function() {
         $('#apply_pid_22_ki').hide();
@@ -1231,6 +1478,7 @@
           $(this).val(params.local.pid_22_ki)
         }
         user_editing = false;
+		$(this).unbind('mousewheel');
       })
       .on('change', function() {
         $(this).blur();
@@ -1238,13 +1486,20 @@
       .on('keypress', function(e) {
         if(e.keyCode == 13) {
           $(this).blur();
-        }
+        }	
       });
 
     $('#pid_22_kd')
       .on('focus paste', function() {
         $(this).parent().addClass('input-group');
         $('#apply_pid_22_kd').show();
+		$(this).bind('mousewheel', function(event, delta) {
+			if(delta > 0)
+				params.local.pid_22_kd += 0.01;
+			else
+				params.local.pid_22_kd -= 0.01;	
+			return false;
+		})
       })
       .on('blur', function() {
         $('#apply_pid_22_kd').hide();
@@ -1259,6 +1514,7 @@
           $(this).val(params.local.pid_22_kd)
         }
         user_editing = false;
+		$(this).unbind('mousewheel');
       })
       .on('change', function() {
         $(this).blur();
@@ -1266,13 +1522,20 @@
       .on('keypress', function(e) {
         if(e.keyCode == 13) {
           $(this).blur();
-        }
+        }	
       });
 	  
     $('#pid_22_limit_up')
       .on('focus paste', function() {
         $(this).parent().addClass('input-group');
         $('#apply_pid_22_limit_up').show();
+		$(this).bind('mousewheel', function(event, delta) {
+			if(delta > 0)
+				params.local.pid_22_limit_up += 0.01;
+			else
+				params.local.pid_22_limit_up -= 0.01;	
+			return false;
+		})
       })
       .on('blur', function() {
         $('#apply_pid_22_limit_up').hide();
@@ -1287,6 +1550,7 @@
           $(this).val(params.local.pid_22_limit_up)
         }
         user_editing = false;
+		$(this).unbind('mousewheel');
       })
       .on('change', function() {
         $(this).blur();
@@ -1301,6 +1565,13 @@
       .on('focus paste', function() {
         $(this).parent().addClass('input-group');
         $('#apply_pid_22_limit_low').show();
+		$(this).bind('mousewheel', function(event, delta) {
+			if(delta > 0)
+				params.local.pid_22_limit_low += 0.01;
+			else
+				params.local.pid_22_limit_low -= 0.01;	
+			return false;
+		})
       })
       .on('blur', function() {
         $('#apply_pid_22_limit_low').hide();
@@ -1315,6 +1586,7 @@
           $(this).val(params.local.pid_22_limit_low)
         }
         user_editing = false;
+		$(this).unbind('mousewheel');
       })
       .on('change', function() {
         $(this).blur();
@@ -1329,6 +1601,13 @@
       .on('focus paste', function() {
         $(this).parent().addClass('input-group');
         $('#apply_pid_22_int_limit').show();
+		$(this).bind('mousewheel', function(event, delta) {
+			if(delta > 0)
+				params.local.pid_22_int_limit += 0.01;
+			else
+				params.local.pid_22_int_limit -= 0.01;	
+			return false;
+		})
       })
       .on('blur', function() {
         $('#apply_pid_22_int_limit').hide();
@@ -1343,6 +1622,7 @@
           $(this).val(params.local.pid_22_int_limit)
         }
         user_editing = false;
+		$(this).unbind('mousewheel');
       })
       .on('change', function() {
         $(this).blur();
@@ -1357,6 +1637,13 @@
       .on('focus paste', function() {
         $(this).parent().addClass('input-group');
         $('#apply_pid_22_kii').show();
+		$(this).bind('mousewheel', function(event, delta) {
+			if(delta > 0)
+				params.local.pid_22_kii += 0.5;
+			else
+				params.local.pid_22_kii -= 0.5;		
+			return false;	
+	    })
       })
       .on('blur', function() {
         $('#apply_pid_22_kii').hide();
@@ -1371,6 +1658,7 @@
           $(this).val(params.local.pid_22_kii)
         }
         user_editing = false;
+		$(this).unbind('mousewheel');
       })
       .on('change', function() {
         $(this).blur();
@@ -1378,7 +1666,7 @@
       .on('keypress', function(e) {
         if(e.keyCode == 13) {
           $(this).blur();
-        }
+        }	
       });
 	  
 	  // Buttons added for output offset ---------------------------------- Fenske
@@ -1387,7 +1675,14 @@
       .on('focus paste', function() {
         $(this).parent().addClass('input-group');
         $('#apply_out_1_offset').show();
-      })
+        $(this).bind('mousewheel', function(event, delta) {
+			if(delta > 0)
+				params.local.out_1_offset += 0.01;
+			else
+				params.local.out_1_offset -= 0.01;	
+			return false;	
+	    })		
+      })	
       .on('blur', function() {
         $('#apply_out_1_offset').hide();
         $(this).parent().removeClass('input-group');
@@ -1401,6 +1696,7 @@
           $(this).val(params.local.out_1_offset)
         }
         user_editing = false;
+		$(this).unbind('mousewheel');
       })
       .on('change', function() {
         $(this).blur();
@@ -1415,7 +1711,14 @@
 	$('#out_2_offset')
       .on('focus paste', function() {
         $(this).parent().addClass('input-group');
-        $('#apply_out_2_offset').show();
+        $('#apply_out_2_offset').show();	
+	    $(this).bind('mousewheel', function(event, delta) {
+			if(delta > 0)
+				params.local.out_2_offset += 0.01;
+			else
+				params.local.out_2_offset -= 0.01;	
+			return false;
+		})
       })
       .on('blur', function() {
         $('#apply_out_2_offset').hide();
@@ -1430,6 +1733,44 @@
           $(this).val(params.local.out_2_offset)
         }
         user_editing = false;
+		$(this).unbind('mousewheel');
+      })
+      .on('change', function() {
+        $(this).blur();
+      })
+      .on('keypress', function(e) {
+        if(e.keyCode == 13) {
+          $(this).blur();
+        }	
+      });
+	  
+	  // MIN_INTENSITY THRESHOLD 1 -------------------------------------------------------- added by Fenske
+	  $('#min_i_threshold_1')
+      .on('focus paste', function() {
+        $(this).parent().addClass('input-group');
+        $('#apply_min_i_threshold_1').show();
+		$(this).bind('mousewheel', function(event, delta) {
+			if(delta > 0)
+				params.local.min_i_threshold_1 += 0.01;
+			else
+				params.local.min_i_threshold_1 -= 0.01;	
+			return false;
+		})
+      })
+      .on('blur', function() {
+        $('#apply_min_i_threshold_1').hide();
+        $(this).parent().removeClass('input-group');
+
+        var val = parseLocalFloat($(this).val());
+        if(! isNaN(val)) {
+          params.local.min_i_threshold_1 = val;
+          sendParams();
+        }
+        else {
+          $(this).val(params.local.min_i_threshold_1)
+        }
+        user_editing = false;
+		$(this).unbind('mousewheel');
       })
       .on('change', function() {
         $(this).blur();
@@ -1439,41 +1780,50 @@
           $(this).blur();
         }
       });
+	  
+	  // MIN_INTENSITY THRESHOLD 2 -------------------------------------------------------- added by Fenske
+	  $('#min_i_threshold_2')
+      .on('focus paste', function() {
+        $(this).parent().addClass('input-group');
+        $('#apply_min_i_threshold_2').show();
+		$(this).bind('mousewheel', function(event, delta) {
+			if(delta > 0)
+				params.local.min_i_threshold_2 += 0.01;
+			else
+				params.local.min_i_threshold_2 -= 0.01;	
+			return false;
+		})
+      })
+      .on('blur', function() {
+        $('#apply_min_i_threshold_2').hide();
+        $(this).parent().removeClass('input-group');
+
+        var val = parseLocalFloat($(this).val());
+        if(! isNaN(val)) {
+          params.local.min_i_threshold_2 = val;
+          sendParams();
+        }
+        else {
+          $(this).val(params.local.min_i_threshold_2)
+        }
+        user_editing = false;
+		$(this).unbind('mousewheel');
+      })
+      .on('change', function() {
+        $(this).blur();
+      })
+      .on('keypress', function(e) {
+        if(e.keyCode == 13) {
+          $(this).blur();
+        }
+      });	  
 	  
 	  // SAVE_SETTINGS --------------------------------------- added by Fenske
 	  $('#save_settings').on('change', function() { onDropdownChange($(this), 'save_settings'); });
 	  
 	  // LOAD_SETTINGS --------------------------------------- added by Fenske
 	  $('#load_settings').on('change', function() { onDropdownChange($(this), 'load_settings'); });
-	  
-	/*$('#load_settings')
-      .on('focus paste', function() {
-        $(this).parent().addClass('input-group');
-        $('#apply_load_settings').show();
-      })
-      .on('blur', function() {
-        $('#apply_load_settings').hide();
-        $(this).parent().removeClass('input-group');
-
-        var val = parseLocalFloat($(this).val());
-        if(! isNaN(val)) {
-          params.local.load_settings = val;
-          sendParams();
-        }
-        else {
-          $(this).val(params.local.load_settings)
-        }
-        user_editing = false;
-      })
-      .on('change', function() {
-        $(this).blur();
-      })
-      .on('keypress', function(e) {
-        if(e.keyCode == 13) {
-          $(this).blur();
-        }
-      });
-	  */
+	
 	
 	// Events binding for signal generator
     
@@ -2066,6 +2416,7 @@ var info_ch2_o_neg = 0;
 		$('#info_ch1_i').html(floatToLocalString(shortenFloat(params.original.meas_i_ch1)));
 		$('#info_ch1_d').html(floatToLocalString(shortenFloat(params.original.meas_d_ch1)));
 		$('#info_ch1_o').html(floatToLocalString(shortenFloat(params.original.meas_o_ch1)));
+		$('#info_min_intens_1').html(floatToLocalString(shortenFloat(params.original.min_intens_1)));
 
         $('#info_ch2_min').html(floatToLocalString(shortenFloat(params.original.meas_min_ch2)));
         $('#info_ch2_max').html(floatToLocalString(shortenFloat(params.original.meas_max_ch2)));
@@ -2073,6 +2424,7 @@ var info_ch2_o_neg = 0;
         $('#info_ch2_avg').html(floatToLocalString(shortenFloat(params.original.meas_avg_ch2)));
         $('#info_ch2_freq').html(convertHz(params.original.meas_freq_ch2));
         $('#info_ch2_period').html(convertSec(params.original.meas_per_ch2));
+		$('#info_min_intens_2').html(floatToLocalString(shortenFloat(params.original.min_intens_2)));
 		
 		// Fenske------------------------------------------------------------------------------------------------- bar graph
 		$('#info_ch2_p').html(floatToLocalString(shortenFloat(params.original.meas_p_ch2)));
@@ -2081,17 +2433,8 @@ var info_ch2_o_neg = 0;
 		$('#info_ch2_o').html(floatToLocalString(shortenFloat(params.original.meas_o_ch2)));
 		
 		$('#rot_encoder').html(floatToLocalString(shortenFloat(params.original.rot_encoder)));
-		
-		
-		<!---Fenske ------------------------------------------------------------------------------------------------------------------------------>		
-		<!---	$('#info_pid11_out_min').html(floatToLocalString(shortenFloat(params.original.meas_min_pid11_out))); ------>	
-		<!---       $('#info_pid11_out_max').html(floatToLocalString(shortenFloat(params.original.meas_max_pid11_out))); ------>	
-		<!---        $('#info_pid11_out_amp').html(floatToLocalString(shortenFloat(params.original.meas_amp_pid11_out))); ------>	
-		<!---       $('#info_pid11_out_avg').html(floatToLocalString(shortenFloat(params.original.meas_avg_pid11_out))); ------>	
-		<!---       $('#info_pid11_out_freq').html(convertHz(params.original.meas_freq_pid11_out)); ------>	
-		<!---       $('#info_pid11_out_period').html(convertSec(params.original.meas_per_pid11_out)); ------>
  
-	<!--- bar graph to visualize the output-parts Fenske ------------->
+	    <!--- bar graph to visualize the output-parts Fenske ------------->
 
 		info_ch1_p = shortenFloat(params.original.meas_p_ch1);
 		info_ch1_i = shortenFloat(params.original.meas_i_ch1);
@@ -2360,6 +2703,9 @@ var info_ch2_o_neg = 0;
 	$('#out_1_offset').val(params.original.out_1_offset); <!--- Fenske -->
 	$('#out_2_offset').val(params.original.out_2_offset); <!--- Fenske -->
 	
+	$('#min_i_threshold_1').val(params.original.min_i_threshold_1); <!--- Fenske -->
+	$('#min_i_threshold_2').val(params.original.min_i_threshold_2); <!--- Fenske -->
+	
 	$('#save_settings').val(params.original.save_settings); <!--- Fenske -->
 	$('#load_settings').val(params.original.load_settings); <!--- Fenske -->
 
@@ -2505,7 +2851,7 @@ var info_ch2_o_neg = 0;
   // better performance. On the canvas cannot be shown too much graph points.
   function filterData(dsets, points) {
     var filtered = [];
-    var num_of_channels = 2; // changed form 2 to 3 --------------------------------------------------------------- Fenske
+    var num_of_channels = 2; 
 
     for(var l=0; l<num_of_channels; l++) {
       if(! $('#btn_ch' + (l+1)).data('checked')) {
@@ -3141,7 +3487,7 @@ var info_ch2_o_neg = 0;
     <div class="container">
       <a id="btn_exit" class="pull-left" href="/index.html"><span class="glyphicon glyphicon-chevron-left" title="Exit" alt="Exit"></span></a>
       <img class="logo pull-left" src="../assets/images/logo_white.png">
-      <h2 class="page-title">2. PID controller</h2>
+      <h2 class="page-title">2. PID Controller</h2>
     </div>
   </div>
   <div class="container">
@@ -3168,9 +3514,7 @@ var info_ch2_o_neg = 0;
           </button>
         </div>
         <button id="btn_ch1" class="btn btn-primary btn-lg" data-checked="true" onclick="setVisibleChannels(this)">Channel 1</button>
-        <button id="btn_ch2" class="btn btn-primary btn-lg" data-checked="true" onclick="setVisibleChannels(this)">Channel 2</button>		
-<!-------Buttons for PID11_Out by Fenske ---------------------------------------------------------------------------------> 
-  <!--- <button id="btn_pid11_out" class="btn btn-primary btn-lg" data-checked="true" onclick="setVisibleChannels(this)">PID11 Out</button>	 --->	
+        <button id="btn_ch2" class="btn btn-primary btn-lg" data-checked="true" onclick="setVisibleChannels(this)">Channel 2</button>			
         <button id="btn_auto" class="btn btn-primary btn-lg" onclick="serverAutoScale()">AUTO</button>
         <button id="btn_avg" class="btn btn-default btn-lg" onclick="setAvgAtDec()">Averaging</button>
       </div>
@@ -3377,16 +3721,7 @@ var info_ch2_o_neg = 0;
             <div class="panel-body">
               <div class="row group-label">
                 <div class="col-xs-6" style="text-align: center">Channel 1</div>
-                <div class="col-xs-6" style="text-align: center">Channel 2</div> 
-		   <!-- <div class="col-xs-1" style="text-align: center">  </div>
-				<div class="col-xs-5">
-                    <select id="chanel_meas" class="form-control">
-                      <option value="0">Channel 2</option>
-                      <option value="1">PID11 Out</option>
-                      <option value="2">PID22 Out</option>
-                    </select>
-                  </div>
-			--> 	  
+                <div class="col-xs-6" style="text-align: center">Channel 2</div> 	  
               </div> 
               <div class="row">
                 <div class="col-xs-3 txt-right">Min:</div>
@@ -3929,10 +4264,7 @@ var info_ch2_o_neg = 0;
                   <div style="padding: 7px 0 0;" class="col-xs-2" id="pid_21_limit_units">V</div>
                 </div>
               </form>
-			 </div> <!-- end simple collapsible by Fenske --------------------------------------->
-			 
- <!-------Buttons for PID12 and PID21 deleted and added again by Fenske ---------------------------------------------------------------> 
-             
+			 </div> <!-- end simple collapsible by Fenske --------------------------------------->          
 			  <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#pid_22_btn">PID 22</button>
 				<div id="pid_22_btn" class="collapse">
               <form class="form-horizontal" role="form" onsubmit="return false;">
@@ -4069,8 +4401,7 @@ var info_ch2_o_neg = 0;
 			  </div>
 			  <div>
 			  PID (Output/Input)
-			  </div>
-			  
+			  </div>		
 			  <hr />
 			  <!------- Output Offset Buttons added by Fenske------------------------------------------------------>
 			  <form class="form-horizontal" role="form" onsubmit="return false;">
@@ -4096,7 +4427,42 @@ var info_ch2_o_neg = 0;
                   </div>
                   <div style="padding: 7px 0 0;" class="col-xs-2" id="out_offset_units">V</div>
                 </div>
-              </form>		  
+              </form>
+			  <hr />
+			  <!------- Threshold for MIN_INTENSITY added by Fenske------------------------------------------------------>
+			  <div>
+			  Threshold for minimum intensity
+			  </div>
+			  <form class="form-horizontal" role="form" onsubmit="return false;">
+                <div class="form-group">
+                  <label for="min_i_threshold_1" class="col-xs-4 control-label">Threshold 1:</label>
+                  <div class="col-xs-4 col-sm-5">
+                    <input type="text" autocomplete="off" class="form-control" value="0" id="min_i_threshold_1">
+                    <span style="display: none;" class="input-group-btn" id="apply_min_i_threshold_1">
+                      <button type="button" class="btn btn-primary btn-lg"><span class="glyphicon glyphicon-ok-circle"></span></button>
+                    </span>
+                  </div>
+                  <div style="padding: 7px 0 0;" class="col-xs-2" id="threshold_units">V</div>
+                </div>
+              </form>
+			  <form class="form-horizontal" role="form" onsubmit="return false;">
+                <div class="form-group">
+                  <label for="min_i_threshold_2" class="col-xs-4 control-label">Threshold 2:</label>
+                  <div class="col-xs-4 col-sm-5">
+                    <input type="text" autocomplete="off" class="form-control" value="0" id="min_i_threshold_2">
+                    <span style="display: none;" class="input-group-btn" id="apply_min_i_threshold_2">
+                      <button type="button" class="btn btn-primary btn-lg"><span class="glyphicon glyphicon-ok-circle"></span></button>
+                    </span>
+                  </div>
+                  <div style="padding: 7px 0 0;" class="col-xs-2" id="threshold_units">V</div>
+                </div>
+              </form>
+			  <div class="row">
+                <div class="col-xs-3 txt-right">Intensity 1:</div>
+                <div class="col-xs-3"><span id="info_min_intens_1">-</span><span class="unit">V</span></div>
+                <div class="col-xs-3 txt-right">Intensity 2:</div>
+                <div class="col-xs-3"><span id="info_min_intens_2">-</span><span class="unit">V</span></div>
+			  </div>
 			  <hr />
 			  <!------- Save and load settings buttons added by Fenske----------------------------------------------------->
 			  <form class="form-horizontal" role="form" onsubmit="return false;">
@@ -4124,37 +4490,7 @@ var info_ch2_o_neg = 0;
                 </div>
 		    </div>
           </div>
-        </div>	
-	<!--------------- Scan test by Fenske 	---------------------------------------------
-		<div class="panel panel-default">
-	  	  <div class="panel-heading">
-			<h4 class="panel-title">
-			  <a data-toggle="collapse" href="#scan">
-				Scan Voltage 
-			  </a>
-			</h4>
-		  </div>
-		  <div id="scan" class="panel-collapse collapse">
-			<div class="panel-body">
-			  <form class="form-horizontal" role="form" onsubmit="return false;">
-				<div class="checkbox" style="padding-bottom: 12px;">
-				  <label class="group-label">
-					<input type="checkbox" id="scan_11_enable" checked> Scan Ch 1
-				  </label>
-				</div>
-			  </form>
-			  <form class="form-horizontal" role="form" onsubmit="return false;">
-				<div class="checkbox" style="padding-bottom: 12px;">
-				  <label class="group-label">
-					<input type="checkbox" id="scan_22_enable" checked> Scan Ch 2
-				  </label>
-				</div>
-			  </form>
-			</div>	
-		  </div>
-      </div>
-	 --------------------- Scan test end ----------------------------------------------->
-	  
+        </div>	 
 	     <div class="panel panel-default">
           <div class="panel-heading">
             <h4 class="panel-title">
@@ -4333,16 +4669,6 @@ var info_ch2_o_neg = 0;
           </div>
         </div>
     </div>
-	
-<!--------------- Bar graphs by Fenske -------------------------------------------------------
-    <div class="row">
-		<div id="outputGraph_ch1" ></div>
-		<div id="outputGraph_ch1_neg"></div>
-
-		<br clear="all" />
-	</div>						
---------------------- Bar graphs end ----------------------------------------------->
-	
     <div class="footer clearfix">
       <p class="pull-right" style="margin: 4px 0 0">&copy; 2014 - Red Pitaya</p>
     </div>

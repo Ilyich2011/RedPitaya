@@ -364,19 +364,28 @@ static rp_app_params_t rp_main_params[PARAMS_NUM+1] = {
 		"out_2_offset",  0, 1, 0, -1, 1 },
 
 	/*********************************************/
-    /* Bar graph measure parameters from here on */
+    /* Min_intensity and bar graph measure parameters from here on */
     /*********************************************/
 	/* added by Fenske ---------------------------------------------------------*/
 
-	{  "meas_p_ch1", 0, 0, 1, -1000, +1000 },   // P-part of output ------ bar graph Fenske
-	{  "meas_i_ch1", 0, 0, 1, -1000, +1000 },	// I-Part of output
-	{  "meas_d_ch1", 0, 0, 1, -1000, +1000 },	// D-part of output
-	{  "meas_o_ch1", 0, 0, 1, -1000, +1000 },	// Output
+	{ /* min_i_threshold_1 - Threshold for min_intensity ------------------------------- Fenske*/
+		"min_i_threshold_1",  1, 1, 0, -1, 1 },
+	{ /* min_i_threshold_2 - Threshold for min_intensity ------------------------------- Fenske*/
+		"min_i_threshold_2",  1, 1, 0, -1, 1 },
+	{ /* min_intens_1 - min_intensity input value -------------------------------------- Fenske*/
+		"min_intens_1", 0, 0, 1, -8000, +8000 },
+	{ /* min_intens_2 - min_intensity input value -------------------------------------- Fenske*/
+		"min_intens_2", 0, 0, 1, -8000, +8000 },
 
-	{  "meas_p_ch2", 0, 0, 1, -1000, +1000 },   // bar graph ------ Fenske
-	{  "meas_i_ch2", 0, 0, 1, -1000, +1000 },
-	{  "meas_d_ch2", 0, 0, 1, -1000, +1000 },
-	{  "meas_o_ch2", 0, 0, 1, -1000, +1000 },
+	{   "meas_p_ch1", 0, 0, 1, -1000, +1000 },   // P-part of output ------ bar graph Fenske
+	{   "meas_i_ch1", 0, 0, 1, -1000, +1000 },	 // I-Part of output
+	{   "meas_d_ch1", 0, 0, 1, -1000, +1000 },	 // D-part of output
+	{   "meas_o_ch1", 0, 0, 1, -1000, +1000 },	 // Output
+
+	{   "meas_p_ch2", 0, 0, 1, -1000, +1000 },   // bar graph ------ Fenske
+	{   "meas_i_ch2", 0, 0, 1, -1000, +1000 },
+	{   "meas_d_ch2", 0, 0, 1, -1000, +1000 },
+	{   "meas_o_ch2", 0, 0, 1, -1000, +1000 },
 
     /********************************/
     /* Rotary encoder and offset parameters from here on */
@@ -1235,6 +1244,9 @@ int rp_update_meas_data(rp_osc_meas_res_t ch1_meas, rp_osc_meas_res_t ch2_meas)
     rp_main_params[MEAS_I_CH2].value = ch2_meas.i;
     rp_main_params[MEAS_D_CH2].value = ch2_meas.d;
     rp_main_params[MEAS_O_CH2].value = ch2_meas.o;
+
+    rp_main_params[MIN_INTENS_1].value = ch1_meas.min_intensity; // min_intensity_value ----- Fenske
+    rp_main_params[MIN_INTENS_2].value = ch2_meas.min_intensity;
 
     rp_main_params[ROT_ENCODER].value = cnv_cnt_to_float(g_pid_reg->rot_encoder, 8192);  // rot_encoder ------ Fenske
 
