@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @brief Red Pitaya PID Controller
  *
  * @Author Ales Bardorfer <ales.bardorfer@redpitaya.com>
@@ -88,7 +88,7 @@ int pid_init(void)
     if(fpga_pid_init() < 0) {
         return -1;
     }
-    system("cd /opt/redpitaya/www/apps/ptb-pid/\n rw"); // should make the folder "ptb-pid" writeable ------ Fenske CHANGE for pid2!!!
+    system("cd /opt/redpitaya/www/apps/pid2\n rw"); // should make the folder "pid2" writeable ------ Fenske CHANGE for pid2!!!
     /* 	The C library function int system(const char *command) passes the command name
     	or program name specified by command to the host environment to be executed
     	by the command processor and returns after the command has been completed. */
@@ -204,9 +204,9 @@ int pid_update(rp_app_params_t *params)
     {
     	switch((int) params[SAVE_SETTINGS].value)
     	{
-    		case 1: fd = fopen("/opt/redpitaya/www/apps/ptb-pid/settings1.txt", "w"); break;
-    		case 2: fd = fopen("/opt/redpitaya/www/apps/ptb-pid/settings2.txt", "w"); break;
-    		case 3: fd = fopen("/opt/redpitaya/www/apps/ptb-pid/settings3.txt", "w"); break;
+    		case 1: fd = fopen("/opt/redpitaya/www/apps/pid2/settings1.txt", "w"); break;
+    		case 2: fd = fopen("/opt/redpitaya/www/apps/pid2/settings2.txt", "w"); break;
+    		case 3: fd = fopen("/opt/redpitaya/www/apps/pid2/settings3.txt", "w"); break;
     		default: break;
     	}
     	if(fd != NULL) {
@@ -222,9 +222,9 @@ int pid_update(rp_app_params_t *params)
     {
         switch((int) params[LOAD_SETTINGS].value)
         {
-        	case 1: fd = fopen("/opt/redpitaya/www/apps/ptb-pid/settings1.txt", "r"); break;
-        	case 2: fd = fopen("/opt/redpitaya/www/apps/ptb-pid/settings2.txt", "r"); break;
-        	case 3: fd = fopen("/opt/redpitaya/www/apps/ptb-pid/settings3.txt", "r"); break;
+        	case 1: fd = fopen("/opt/redpitaya/www/apps/pid2/settings1.txt", "r"); break;
+        	case 2: fd = fopen("/opt/redpitaya/www/apps/pid2/settings2.txt", "r"); break;
+        	case 3: fd = fopen("/opt/redpitaya/www/apps/pid2/settings3.txt", "r"); break;
         	default: break;
         }
         if(fd != NULL) {
