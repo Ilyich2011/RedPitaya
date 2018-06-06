@@ -561,25 +561,22 @@ int32_t stop_relocking(int channel){
 void reset_gen_offset(int channel){
 	int i;
 	awg_param_t ch_params;
-	if (g_enabled[channel] != 1){
-    		ch_params.step = (channel == 0) ? g_awg_reg->cha_count_step : g_awg_reg->chb_count_step;
-    		ch_params.wrap = (channel == 0) ? g_awg_reg->cha_count_wrap : g_awg_reg->chb_count_wrap;
-    		ch_params.offsgain = (channel == 0) ? g_awg_reg->cha_scale_off : g_awg_reg->chb_scale_off;
+    	ch_params.step = (channel == 0) ? g_awg_reg->cha_count_step : g_awg_reg->chb_count_step;
+    	ch_params.wrap = (channel == 0) ? g_awg_reg->cha_count_wrap : g_awg_reg->chb_count_wrap;
+    	ch_params.offsgain = (channel == 0) ? g_awg_reg->cha_scale_off : g_awg_reg->chb_scale_off;
 		
-		if (channel == 0) g_awg_reg->cha_count_step = 0; else g_awg_reg->chb_count_step = 0;
+	if (channel == 0) g_awg_reg->cha_count_step = 0; else g_awg_reg->chb_count_step = 0;
 
-    		if (channel == 0){
-    			for(i = 0; i < AWG_SIG_LEN; i++)
-        			ch1_data[i]=0;
-        	} else {
-        		for(i = 0; i < AWG_SIG_LEN; i++)
-        			ch2_data[i]=0;
-        	}
-		write_data_fpga(channel, 0,
-                	0,
-                	(channel == 0) ? ch1_data : ch2_data, &ch_params, 0);
-            	g_enabled[channel] = 0;
-     }
+    	if (channel == 0){
+    		for(i = 0; i < AWG_SIG_LEN; i++)
+        		ch1_data[i]=0;
+        } else {
+        	for(i = 0; i < AWG_SIG_LEN; i++)
+        		ch2_data[i]=0;
+        }
+	write_data_fpga(channel, 0,
+               	0,
+               	(channel == 0) ? ch1_data : ch2_data, &ch_params, 0);
 }
 /*----------------------------------------------------------------------------------*/
 /**

@@ -40,19 +40,22 @@ float old_int_limit[NUM_OF_PIDS] = {1, 1, 1, 1}; // is needed to compare the int
 FILE *fd; // new file for saving pid-settings ------------------ Fenske
 int idx; // count variable
 int no_settings = NUM_OF_PIDS*PARAMS_PER_PID+4; //number of PID settings (+4 for saving the offset and threshold values too)
-float min_intens_threshold[] = {0, 0}; // local copie of threshold value to which the XADC value is compared to
-int threshold_reached[] = {0, 0}; // flag if threshold is reached (for later)
+float min_intens_threshold = 0; // local copie of threshold value to which the XADC value is compared to
+int threshold_reached = 0; // flag if threshold is reached (for later)
 float xadc_offset[] = {0, 0}; // offsetvalue of XADC measured at pid_init()
 int old_setpoint[] = {0, 0, 0, 0}; // saves the old_setpoint value
 
 //int wwp1 = 0;		//--Zalivako
 //int wwp2 = 0;   	//--Zalivako
-int locked[] = {0, 0};	//--Zalivako
-int pid_enabled[] = {0, 0}; // Zalivako
+int locked = 0;	//--Zalivako
+int pid_enabled = 0; // Zalivako
 pid_param_t pid[NUM_OF_PIDS] = {{ 0 }}; //--placed here by Zalivako
 uint32_t pid_configuration = 0;
-int32_t pid_out_before_relock[] = {0, 0};
-int32_t real_offset[] = {0,0};
+int32_t slow_out = 0;
+int slow_enabled = 0;
+short slow_counter = 0;
+float slow_k = 0.0;
+
 
 /**
  * GENERAL DESCRIPTION:
@@ -98,6 +101,8 @@ int32_t real_offset[] = {0,0};
 
 int pid_init(void)
 {
+    int i;
+    
     if(fpga_pid_init() < 0) {
         return -1;
     }
@@ -114,6 +119,23 @@ int pid_init(void)
     // get offset value of XADCs 2 and 3 and store them to xadc_offset
     rp_AIpinGetValue(2, &xadc_offset[0]);
     rp_AIpinGetValue(3, &xadc_offset[1]);
+    
+    for (i = 1; i<NUM_OF_PIDS; i++){	
+    	g_pid_reg->pid[i].gain = 0;
+        g_pid_reg->pid[i].setpoint = 0;
+        g_pid_reg->pid[i].kp = 0;
+        g_pid_reg->pid[i].ki = 0;
+        g_pid_reg->pid[i].kd = 0;
+        g_pid_reg->pid[i].limit_up = (int)max_cnt; 
+        g_pid_reg->pid[i].limit_low = (int)(-max_cnt); 
+        g_pid_reg->pid[i].int_limit = (int)max_cnt;
+        g_pid_reg->pid[i].kii = 0;
+    }
+    
+    g_pid_reg->out_1_offset = 0;
+    g_pid_reg->out_2_offset = 0;
+    g_pid_reg->configuration = 14;
+    
     return 0;
 }
 
@@ -159,69 +181,68 @@ int pid_update(rp_app_params_t *params)
     
     memset(pid, 0, NUM_OF_PIDS*sizeof(pid_param_t));
 
-    for (i = 0; i < 1; i++) {
         /* PID enabled? */
-        if (params[PID_11_ENABLE + i * PARAMS_PER_PID].value == 1) {
-        	pid[i].gain = (int)((params[PID_11_GAIN + i * PARAMS_PER_PID].value)*128);  // Fenske (*128 to get integer-value)
-        	pid[i].setpoint = (int)(((params[PID_11_SP + i * PARAMS_PER_PID].value)*max_cnt)); // + dac_dc_offset[i]); // Fenske
-        	old_setpoint[i] = pid[i].setpoint;
-        	pid[i].kp = (int)((params[PID_11_KP + i * PARAMS_PER_PID].value)*dac_kp_1);  // Fenske
-            pid[i].ki = (int)((params[PID_11_KI + i * PARAMS_PER_PID].value)*norm_int);
-            pid[i].kd = (int)((params[PID_11_KD + i * PARAMS_PER_PID].value)*norm_diff);
-            pid[i].limit_up = (int)((params[PID_11_LIMIT_UP + i * PARAMS_PER_PID].value)*max_cnt); // Fenske
-            pid[i].limit_low = (int)((params[PID_11_LIMIT_LOW + i * PARAMS_PER_PID].value)*max_cnt); // Fenske
-            pid[i].int_limit = (int)((params[PID_11_INT_LIMIT + i * PARAMS_PER_PID].value)*max_cnt); // Fenske
-            pid[i].kii = (int)((params[PID_11_KII + i * PARAMS_PER_PID].value)*norm_int);
+    if (params[PID_11_ENABLE].value == 1) {
+    	pid[0].gain = (int)((params[PID_11_GAIN].value)*128);  // Fenske (*128 to get integer-value)
+    	pid[0].setpoint = (int)(((params[PID_11_SP].value)*max_cnt)); // + dac_dc_offset[i]); // Fenske
+    	old_setpoint[0] = pid[0].setpoint;
+    	pid[0].kp = (int)((params[PID_11_KP].value)*dac_kp_1);  // Fenske
+        pid[0].ki = (int)((params[PID_11_KI].value)*norm_int);
+        pid[0].kd = (int)((params[PID_11_KD].value)*norm_diff);
+        pid[0].limit_up = (int)((params[PID_11_LIMIT_UP)*max_cnt); // Fenske
+        pid[0].limit_low = (int)((params[PID_11_LIMIT_LOW].value)*max_cnt); // Fenske
+        pid[0].int_limit = (int)((params[PID_11_INT_LIMIT].value)*max_cnt); // Fenske
+        pid[0].kii = (int)((params[PID_11_KII].value)*norm_int);
 
-            if(old_int_limit[i] > params[PID_11_INT_LIMIT + i * PARAMS_PER_PID].value) { // reset integrator if int_limit is set
-            	g_pid_reg->pid[i].ki = 0;
-            }
-            old_int_limit[i] = params[PID_11_INT_LIMIT + i * PARAMS_PER_PID].value;
+        if(old_int_limit[0] > params[PID_11_INT_LIMIT].value) { // reset integrator if int_limit is set
+       	    g_pid_reg->pid[0].ki = 0;
         }
-        else if (params[PID_11_ENABLE + i * PARAMS_PER_PID].value != 1) {  // added by Fenske (to reset the output if PID is not enabled -------
-            ireset |= (1 << i);
-            if (i == 0){
-            	reset_gen_offset(0);
-            	real_offset[0] = 0;
-            }
-            if (i == 3){
-            	reset_gen_offset(1);
-            	real_offset[1] = 0;
-            }
-        }
-
-        g_pid_reg->pid[i].gain = pid[i].gain;
-        g_pid_reg->pid[i].setpoint = pid[i].setpoint;
-        g_pid_reg->pid[i].kp = pid[i].kp;
-        g_pid_reg->pid[i].ki = pid[i].ki;
-        g_pid_reg->pid[i].kd = pid[i].kd;
-        g_pid_reg->pid[i].limit_up = pid[i].limit_up - ((i == 0) ? real_offset[0] : 0) - ((i == 3) ? real_offset[1] : 0); // ------------------------------------------------ Fenske
-        g_pid_reg->pid[i].limit_low = pid[i].limit_low - ((i == 0) ? real_offset[0] : 0) - ((i == 3) ? real_offset[1] : 0); // ---------------------------------------------- Fenske
-        g_pid_reg->pid[i].int_limit = pid[i].int_limit; // Fenske
-        g_pid_reg->pid[i].kii = pid[i].kii;
-        
-
-        if (params[PID_11_RESET + i * PARAMS_PER_PID].value == 1) {
-            ireset |= (1 << i);
-        }
-
-        /* added by Fenske for automatic Integrator reset-------------------------------------------------*/
-        if (params[PID_11_ARESET + i * PARAMS_PER_PID].value == 1) {
-            ireset |= (1 << (i+NUM_OF_PIDS));
-        }
+        old_int_limit[i] = params[PID_11_INT_LIMIT].value;
+    }
+    else if (params[PID_11_ENABLE].value != 1) {  // added by Fenske (to reset the output if PID is not enabled -------
+        ireset |= 1;
     }
     
-    pid_configuration = ireset;
+
+    g_pid_reg->pid[0].gain = pid[0].gain;
+    g_pid_reg->pid[0].setpoint = pid[0].setpoint;
+    g_pid_reg->pid[0].kp = pid[0].kp;
+    g_pid_reg->pid[0].ki = pid[0].ki;
+    g_pid_reg->pid[0].kd = pid[0].kd;
+    g_pid_reg->pid[0].limit_up = pid[0].limit_up; // ------------------------------------------------ Fenske
+    g_pid_reg->pid[0].limit_low = pid[0].limit_low; // ---------------------------------------------- Fenske
+    g_pid_reg->pid[0].int_limit = pid[0].int_limit; // Fenske
+    g_pid_reg->pid[0].kii = pid[0].kii;
+        
+
+    if (params[PID_11_RESET].value == 1) {
+        ireset |= 1;
+    }
+
+    /* added by Fenske for automatic Integrator reset-------------------------------------------------*/
+    if (params[PID_11_ARESET].value == 1) {
+        ireset |= (1 << NUM_OF_PIDS);
+    }
     
     g_pid_reg->configuration = ireset;
 
-    // Offset settings go to FPGA
-    g_pid_reg->out_1_offset = 0;//(int)((params[OUT_1_OFFSET].value)*max_cnt); // ------------------- Fenske
-    g_pid_reg->out_2_offset = 0;//(int)((params[OUT_2_OFFSET].value)*max_cnt); // ------------------- Fenske
-
     // Threshold for min_intensity goes to local parameter needed by "pid_min_intensity()"
-    min_intens_threshold[0] = params[MIN_I_THRESHOLD_1].value; // --------------- Fenske
-    min_intens_threshold[1] = params[MIN_I_THRESHOLD_2].value; // --------------- Fenske
+    min_intens_threshold = params[MIN_I_THRESHOLD_1].value; // --------------- Fenske
+    
+    
+    
+    //Slow integrator parameters
+    if ((params[PID_22_ENABLE].value == 1) && (params[PID_11_ENABLE].value == 1)) {
+    	slow_enabled = 1;
+    	slow_k = params[PID_22_KP].value;
+    } else if (slow_enabled == 1) {
+    	reset_gen_offset(1);
+    	slow_counter = 0;
+    	slow_enabled = 0;
+    	slow_out = 0;	
+    }
+    
+    
 
     // Save settings ---------------------------------------------------------------------------- Fenske
     // (for creating files it is necessary to mount the folder on the SD-card writable! see pid_init() )
@@ -268,14 +289,11 @@ int pid_update(rp_app_params_t *params)
         
     }
     
-    pid_enabled[0] = params[PID_11_ENABLE + 0 * PARAMS_PER_PID].value;
-    pid_enabled[1] = 0;
+    pid_enabled = params[PID_11_ENABLE].value;
     
-    for (i = 0; i<2; i++)
-    	if ((pid_enabled[i] == 0) && (locked[i] > RELOCK_TIMEOUT)){
-    		//stop_relocking(i);
-    		locked[i] = 0;
-    	}
+    if ((pid_enabled == 0) && (locked > RELOCK_TIMEOUT)){
+    		locked = 0;
+    }
     
     
     return 0;
