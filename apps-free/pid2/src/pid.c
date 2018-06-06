@@ -25,7 +25,7 @@
 #include "generate.h"
 
 #define RELOCK_TIMEOUT 20
-#define LOG_PERIOD 200
+#define SLOW_PID_PERIOD 40
 
 // Variables
 void* map_ams = (void*)(-1);
@@ -53,9 +53,6 @@ pid_param_t pid[NUM_OF_PIDS] = {{ 0 }}; //--placed here by Zalivako
 uint32_t pid_configuration = 0;
 int32_t pid_out_before_relock[] = {0, 0};
 int32_t real_offset[] = {0,0};
-int32_t log_timer = 0;
-float photodetectors_log[] = {0.0, 0.0};
-int enable_log = 0;
 
 /**
  * GENERAL DESCRIPTION:
@@ -162,7 +159,7 @@ int pid_update(rp_app_params_t *params)
     
     memset(pid, 0, NUM_OF_PIDS*sizeof(pid_param_t));
 
-    for (i = 0; i < NUM_OF_PIDS; i++) {
+    for (i = 0; i < 1; i++) {
         /* PID enabled? */
         if (params[PID_11_ENABLE + i * PARAMS_PER_PID].value == 1) {
         	pid[i].gain = (int)((params[PID_11_GAIN + i * PARAMS_PER_PID].value)*128);  // Fenske (*128 to get integer-value)
@@ -272,7 +269,7 @@ int pid_update(rp_app_params_t *params)
     }
     
     pid_enabled[0] = params[PID_11_ENABLE + 0 * PARAMS_PER_PID].value;
-    pid_enabled[1] = params[PID_11_ENABLE + 3 * PARAMS_PER_PID].value;
+    pid_enabled[1] = 0;
     
     for (i = 0; i<2; i++)
     	if ((pid_enabled[i] == 0) && (locked[i] > RELOCK_TIMEOUT)){
@@ -280,12 +277,6 @@ int pid_update(rp_app_params_t *params)
     		locked[i] = 0;
     	}
     
-    if (params[OUT_1_OFFSET].value != 0) {
-    	enable_log = 1;
-    	log_timer = 0;
-    	photodetectors_log[0] = 0;
-    	photodetectors_log[1] = 0;
-    } else enable_log = 0;
     
     return 0;
 }
@@ -305,10 +296,8 @@ int pid_update_meas_output(rp_osc_meas_res_t *ch_meas, int channel)  // bar grap
 float pid_min_intensity(int channel)
 {
 	float intensity = 0;
-	float intensity2 = 0;
 	int32_t offs = 0;
 	int32_t up = 0;
-	int i = 0;
 	int32_t low = 0;
 	channel = channel - 1;
 	rp_AIpinGetValue(channel+2, &intensity); // read XADC2 value
@@ -370,23 +359,6 @@ float pid_min_intensity(int channel)
 		}
 	}
 	
-	//here is power logging
-	
-	if ((pid_enabled[0] != 0) && (pid_enabled[1] != 0) && (enable_log != 0) && (channel == 0)){
-		for (i=0; i<2; i++){
-			rp_AIpinGetValue(i+2, &intensity2);
-			photodetectors_log[i] += intensity2 - xadc_offset[i];
-		}
-		log_timer++;
-		if (log_timer >= LOG_PERIOD){
-			fd = fopen("/opt/redpitaya/www/apps/pid2/power_log.txt", "a");
-			fprintf(fd, "%.3f\t%.3f\r\n", photodetectors_log[0]/LOG_PERIOD, photodetectors_log[1]/LOG_PERIOD);
-			fclose(fd);
-			photodetectors_log[0] = 0.0;
-			photodetectors_log[1] = 0.0;
-			log_timer=0;
-		}
-	}
 	
 	return intensity; // threshold_reached;
 }
