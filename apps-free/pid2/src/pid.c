@@ -22,6 +22,10 @@
 
 #include "pid.h"
 #include "fpga_pid.h"
+#include "generate.h"
+
+#define RELOCK_TIMEOUT 20
+#define LOG_PERIOD 200
 
 // Variables
 void* map_ams = (void*)(-1);
@@ -40,6 +44,18 @@ float min_intens_threshold[] = {0, 0}; // local copie of threshold value to whic
 int threshold_reached[] = {0, 0}; // flag if threshold is reached (for later)
 float xadc_offset[] = {0, 0}; // offsetvalue of XADC measured at pid_init()
 int old_setpoint[] = {0, 0, 0, 0}; // saves the old_setpoint value
+
+//int wwp1 = 0;		//--Zalivako
+//int wwp2 = 0;   	//--Zalivako
+int locked[] = {0, 0};	//--Zalivako
+int pid_enabled[] = {0, 0}; // Zalivako
+pid_param_t pid[NUM_OF_PIDS] = {{ 0 }}; //--placed here by Zalivako
+uint32_t pid_configuration = 0;
+int32_t pid_out_before_relock[] = {0, 0};
+int32_t real_offset[] = {0,0};
+int32_t log_timer = 0;
+float photodetectors_log[] = {0.0, 0.0};
+int enable_log = 0;
 
 /**
  * GENERAL DESCRIPTION:
@@ -142,8 +158,9 @@ int pid_update(rp_app_params_t *params)
 {
     int i;
 
-    pid_param_t pid[NUM_OF_PIDS] = {{ 0 }};
     uint32_t ireset = 0;
+    
+    memset(pid, 0, NUM_OF_PIDS*sizeof(pid_param_t));
 
     for (i = 0; i < NUM_OF_PIDS; i++) {
         /* PID enabled? */
@@ -166,6 +183,14 @@ int pid_update(rp_app_params_t *params)
         }
         else if (params[PID_11_ENABLE + i * PARAMS_PER_PID].value != 1) {  // added by Fenske (to reset the output if PID is not enabled -------
             ireset |= (1 << i);
+            if (i == 0){
+            	reset_gen_offset(0);
+            	real_offset[0] = 0;
+            }
+            if (i == 3){
+            	reset_gen_offset(1);
+            	real_offset[1] = 0;
+            }
         }
 
         g_pid_reg->pid[i].gain = pid[i].gain;
@@ -173,10 +198,11 @@ int pid_update(rp_app_params_t *params)
         g_pid_reg->pid[i].kp = pid[i].kp;
         g_pid_reg->pid[i].ki = pid[i].ki;
         g_pid_reg->pid[i].kd = pid[i].kd;
-        g_pid_reg->pid[i].limit_up = pid[i].limit_up; // ------------------------------------------------ Fenske
-        g_pid_reg->pid[i].limit_low = pid[i].limit_low; // ---------------------------------------------- Fenske
+        g_pid_reg->pid[i].limit_up = pid[i].limit_up - ((i == 0) ? real_offset[0] : 0) - ((i == 3) ? real_offset[1] : 0); // ------------------------------------------------ Fenske
+        g_pid_reg->pid[i].limit_low = pid[i].limit_low - ((i == 0) ? real_offset[0] : 0) - ((i == 3) ? real_offset[1] : 0); // ---------------------------------------------- Fenske
         g_pid_reg->pid[i].int_limit = pid[i].int_limit; // Fenske
         g_pid_reg->pid[i].kii = pid[i].kii;
+        
 
         if (params[PID_11_RESET + i * PARAMS_PER_PID].value == 1) {
             ireset |= (1 << i);
@@ -188,11 +214,13 @@ int pid_update(rp_app_params_t *params)
         }
     }
     
+    pid_configuration = ireset;
+    
     g_pid_reg->configuration = ireset;
 
     // Offset settings go to FPGA
-    g_pid_reg->out_1_offset = (int)((params[OUT_1_OFFSET].value)*max_cnt); // ------------------- Fenske
-    g_pid_reg->out_2_offset = (int)((params[OUT_2_OFFSET].value)*max_cnt); // ------------------- Fenske
+    g_pid_reg->out_1_offset = 0;//(int)((params[OUT_1_OFFSET].value)*max_cnt); // ------------------- Fenske
+    g_pid_reg->out_2_offset = 0;//(int)((params[OUT_2_OFFSET].value)*max_cnt); // ------------------- Fenske
 
     // Threshold for min_intensity goes to local parameter needed by "pid_min_intensity()"
     min_intens_threshold[0] = params[MIN_I_THRESHOLD_1].value; // --------------- Fenske
@@ -235,7 +263,30 @@ int pid_update(rp_app_params_t *params)
         fclose(fd);
         params[LOAD_SETTINGS].value = 0;
         pid_update(&params[0]); // load saved and loaded params into fpga
+        
+        //This is for power logging
+        //We should dump the file here
+        fd = fopen("/opt/redpitaya/www/apps/pid2/power_log.txt", "w");
+        fclose(fd);
+        
     }
+    
+    pid_enabled[0] = params[PID_11_ENABLE + 0 * PARAMS_PER_PID].value;
+    pid_enabled[1] = params[PID_11_ENABLE + 3 * PARAMS_PER_PID].value;
+    
+    for (i = 0; i<2; i++)
+    	if ((pid_enabled[i] == 0) && (locked[i] > RELOCK_TIMEOUT)){
+    		//stop_relocking(i);
+    		locked[i] = 0;
+    	}
+    
+    if (params[OUT_1_OFFSET].value != 0) {
+    	enable_log = 1;
+    	log_timer = 0;
+    	photodetectors_log[0] = 0;
+    	photodetectors_log[1] = 0;
+    } else enable_log = 0;
+    
     return 0;
 }
 
@@ -254,50 +305,88 @@ int pid_update_meas_output(rp_osc_meas_res_t *ch_meas, int channel)  // bar grap
 float pid_min_intensity(int channel)
 {
 	float intensity = 0;
-	int count = 10;
-
-	switch(channel) {
-		case 1:{ // XADC2
-			rp_AIpinGetValue(2, &intensity); // read XADC2 value
-			intensity = intensity - xadc_offset[0]; // subtract the offset
-			if(intensity >= min_intens_threshold[0]){ // compare the intensity to the threshold
-				if(old_setpoint[0] == (g_pid_reg->pid[0].setpoint)) threshold_reached[0] = 0; // if everything is fine -> do nothing
-				else g_pid_reg->pid[0].setpoint = old_setpoint[0]; // if the threshold is reached in this moment, reset the setpoint to old value
+	float intensity2 = 0;
+	int32_t offs = 0;
+	int32_t up = 0;
+	int i = 0;
+	int32_t low = 0;
+	channel = channel - 1;
+	rp_AIpinGetValue(channel+2, &intensity); // read XADC2 value
+	intensity = intensity - xadc_offset[channel]; // subtract the offset
+	if (pid_enabled[channel] != 0){
+		if((intensity >= min_intens_threshold[channel])){ // compare the intensity to the threshold
+			if ((locked[channel]>RELOCK_TIMEOUT)){
+				//stopping generator and setting offset to the last generator's value
+				offs = stop_relocking(channel);
+				real_offset[channel] = offs;
+				//correcting output limits according to the offset by generator
+				g_pid_reg->pid[(channel == 0) ? 0 : 3].limit_up = pid[(channel == 0) ? 0 : 3].limit_up - real_offset[channel]; 
+        			g_pid_reg->pid[(channel == 0) ? 0 : 3].limit_low = pid[(channel == 0) ? 0 : 3].limit_low - real_offset[channel];
+				
+				//turning integrator back on
+				//g_pid_reg->pid[(channel == 0) ? 0 : 3].kp = pid[(channel == 0) ? 0 : 3].kp;
+				g_pid_reg->pid[(channel == 0) ? 0 : 3].ki = pid[(channel == 0) ? 0 : 3].ki;
+				g_pid_reg->pid[(channel == 0) ? 0 : 3].kii = pid[(channel == 0) ? 0 : 3].kii;
+				//g_pid_reg->configuration = pid_configuration;
+				
+				//logging
+				/*fd = fopen("/opt/redpitaya/www/apps/pid2/debug.txt", "a");
+               			fprintf(fd, "Stopping generator %d!\n", channel+1);
+              			fclose(fd);*/
 			}
-			if((old_setpoint[0] < max_cnt) && (min_intens_threshold[0] < 1) && (intensity < min_intens_threshold[0])){
-				if(g_pid_reg->pid[0].setpoint == max_cnt){ // if one limit is reached, reset and search in the other direction
-					g_pid_reg->pid[0].setpoint = 0;
-					count = -10;
-				}
-				else if(g_pid_reg->pid[0].setpoint == -max_cnt){
-					g_pid_reg->pid[0].setpoint = 0;
-					count = 10;
-				}
-				else g_pid_reg->pid[0].setpoint = g_pid_reg->pid[0].setpoint + count; // is (intensity < min_intens_threshold) increase the error signal by increasing the setpoint
-			}
-			break;
+			locked[channel] = 0;
 		}
-		case 2:{ // XADC3
-			rp_AIpinGetValue(3, &intensity); // read XADC3 value
-			intensity = intensity - xadc_offset[1]; // subtract the offset
-			if(intensity >= min_intens_threshold[1]){ // compare the intensity to the threshold
-				if(old_setpoint[3] == (g_pid_reg->pid[3].setpoint)) threshold_reached[1] = 0; // if everything is fine -> do nothing
-				else g_pid_reg->pid[3].setpoint = old_setpoint[3]; // if the threshold is reached in this moment, reset the setpoint to old value
-			}
-			if((old_setpoint[3] < max_cnt) && (min_intens_threshold[1] < 1) && (intensity < min_intens_threshold[1])){
-				if(g_pid_reg->pid[3].setpoint == max_cnt){ // if one limit is reached, reset and search in the other direction
-					g_pid_reg->pid[3].setpoint = 0;
-					count = -10;
+		if((min_intens_threshold[channel] < 1) && (intensity < min_intens_threshold[channel])){
+			if (locked[channel] == RELOCK_TIMEOUT){
+			//time to turn on generator!!!
+				//step one: resetting pid integrator (to prevent it from interfering in relocking proccess)
+				g_pid_reg->pid[(channel == 0) ? 0 : 3].ki = 0;
+				g_pid_reg->pid[(channel == 0) ? 0 : 3].kii = 0;
+				//g_pid_reg->configuration = (pid_configuration | (1 <<  ((channel == 0) ? 0 : 3)));
+				
+				//step two: storing current value of the pid output (relative to the offset) we need to convert it to a proper 32 bit signed int
+				pid_out_before_relock[channel] = (int32_t)(g_pid_reg->meas[channel].o & 0x3FFF);
+				if (pid_out_before_relock[channel] & (1<<13)) {
+					//value is negative. We need to fill all other bits on the left with ones as yet it is signed 14-bit value
+					pid_out_before_relock[channel] |= (uint32_t) (~0x3FFF);
 				}
-				else if(g_pid_reg->pid[3].setpoint == -max_cnt){
-					g_pid_reg->pid[3].setpoint = 0;
-					count = 10;
-				}
-				else g_pid_reg->pid[3].setpoint = g_pid_reg->pid[3].setpoint + count; // is (intensity < min_intens_threshold) increase the error signal by increasing the setpoint
-			}
-			break;
+				
+				
+				
+				offs = real_offset[channel];
+				
+				up = pid[(channel == 0) ? 0 : 3].limit_up;
+				low = pid[(channel == 0) ? 0 : 3].limit_low;
+				
+				//step three: starting generator from the initial position of the pid controller scanning all with triangles
+				start_relocking_generation(channel, pid_out_before_relock[channel]+offs, low/max_cnt,up/max_cnt);
+				//if (channel == 0) g_pid_reg->out_1_offset = 0; else g_pid_reg->out_2_offset = 0;
+              			/*fd = fopen("/opt/redpitaya/www/apps/pid2/debug.txt", "a");
+              			fprintf(fd, "Starting generator %d!\nout: %d, min: %f, max: %f\n", channel+1,pid_out_before_relock[channel], (low)/max_cnt,(up)/max_cnt);
+              			fclose(fd);*/	
+               			locked[channel]++;
+			} 
+			if (locked[channel] <= RELOCK_TIMEOUT) locked[channel]++;
 		}
-		default: break; // threshold_reached = 0; break;
 	}
+	
+	//here is power logging
+	
+	if ((pid_enabled[0] != 0) && (pid_enabled[1] != 0) && (enable_log != 0) && (channel == 0)){
+		for (i=0; i<2; i++){
+			rp_AIpinGetValue(i+2, &intensity2);
+			photodetectors_log[i] += intensity2 - xadc_offset[i];
+		}
+		log_timer++;
+		if (log_timer >= LOG_PERIOD){
+			fd = fopen("/opt/redpitaya/www/apps/pid2/power_log.txt", "a");
+			fprintf(fd, "%.3f\t%.3f\r\n", photodetectors_log[0]/LOG_PERIOD, photodetectors_log[1]/LOG_PERIOD);
+			fclose(fd);
+			photodetectors_log[0] = 0.0;
+			photodetectors_log[1] = 0.0;
+			log_timer=0;
+		}
+	}
+	
 	return intensity; // threshold_reached;
 }

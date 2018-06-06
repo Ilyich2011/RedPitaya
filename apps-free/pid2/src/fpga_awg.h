@@ -93,7 +93,7 @@ typedef struct awg_reg_t {
     uint32_t cha_count_step;
 
     /** @brief Reserved */
-    uint32_t reserved_regs[4];
+    uint32_t reserved_regs1[4];
 
     /** @brief Offset 0x24 - Channel B amplitude scale and offset 
      *
@@ -129,6 +129,7 @@ typedef struct awg_reg_t {
      * bits [29: 0] - Counter step
      */
     uint32_t chb_count_step;
+    uint32_t reserved_regs2[4];
 } awg_reg_t;
 
 /** @} */

@@ -4,7 +4,7 @@ RM=rm
 OBJECTS=main.o fpga.o worker.o calib.o fpga_awg.o generate.o fpga_pid.o pid.o
 
 CFLAGS+= -Wall -Werror -g -fPIC $(INCLUDE)
-LDFLAGS=-shared -L/opt/redpitaya/lib -lrp
+LDFLAGS=-shared -L../../../api/lib -lrp
 
 CONTROLLER = ../controllerhf.so
 

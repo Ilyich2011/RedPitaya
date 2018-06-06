@@ -1146,7 +1146,7 @@ int rp_osc_meas_clear(rp_osc_meas_res_t *ch_meas)
 
 
 /*----------------------------------------------------------------------------------*/
-inline int rp_osc_adc_sign(int in_data)
+static int rp_osc_adc_sign(int in_data)
 {
     int s_data = in_data;
     if(s_data & (1<<(c_osc_fpga_adc_bits-1)))
@@ -1301,7 +1301,7 @@ int rp_osc_meas_output(rp_osc_meas_res_t *ch_meas, float adc_max_v) // bar graph
 
 
 /*----------------------------------------------------------------------------------*/
-inline float rp_osc_meas_cnv_cnt(float data, float adc_max_v)
+static float rp_osc_meas_cnv_cnt(float data, float adc_max_v)
 {
     return (data * adc_max_v / (float)(1<<(c_osc_fpga_adc_bits-1)));
 }

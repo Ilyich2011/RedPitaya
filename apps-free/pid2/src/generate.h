@@ -28,6 +28,7 @@ typedef enum awg_signal_e {
     eSignalSine = 0,     /* Sinusoidal waveform. */
     eSignalSquare,       /* Square waveform. */
     eSignalTriangle,     /* Triangular waveform. */
+    eSignalTriangleShifted, /* Triangular, starting from start_point */
     eSignalFile          /* Waveform read from file */
 } awg_signal_t;
 
@@ -40,9 +41,12 @@ typedef struct awg_param_s {
 
 /** @} */
 
+void start_relocking_generation(int channel, int32_t start, float min, float max);
+void reset_gen_offset(int channel);
 int generate_init(rp_calib_params_t *calib_params);
 int generate_exit(void);
 
 int generate_update(rp_app_params_t *params);
+int32_t stop_relocking(int channel);
 
 #endif // __GENERATE_H

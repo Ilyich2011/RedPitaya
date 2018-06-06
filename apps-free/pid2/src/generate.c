@@ -78,6 +78,8 @@ float ch2_max_dac_v;
 const char *gen_waveform_file1="/tmp/gen_ch1.csv";
 const char *gen_waveform_file2="/tmp/gen_ch2.csv";
 
+int g_enabled[] = {0, 0};
+int32_t last_val = 0;
 
 /*----------------------------------------------------------------------------------*/
 /**
@@ -98,7 +100,7 @@ const char *gen_waveform_file2="/tmp/gen_ch2.csv";
  */
 void synthesize_signal(float ampl, float freq, int calib_dc_offs, int calib_fs,
                        float max_dac_v, float user_dc_offs, awg_signal_t type, 
-                       int32_t *data, awg_param_t *awg) 
+                       int32_t *data, awg_param_t *awg, int32_t start_point /*Zalivako. For relock*/, float relock_offset /*Zalivako. For relock*/) 
 {
     uint32_t i;
 
@@ -113,6 +115,7 @@ void synthesize_signal(float ampl, float freq, int calib_dc_offs, int calib_fs,
     int user_dc_off_cnt = 
         round((1<<(c_awg_fpga_dac_bits-1)) * user_dc_offs / max_dac_v);
     uint32_t amp; 
+    int32_t rel_off;
 
     /* Saturate offset - depending on calibration offset, it could overflow */
     int offsgain = calib_dc_offs + user_dc_off_cnt;
@@ -135,6 +138,10 @@ void synthesize_signal(float ampl, float freq, int calib_dc_offs, int calib_fs,
         trans = trans0;
     }
 
+    rel_off = round(relock_offset/fpga_awg_calc_dac_max_v(calib_fs)*c_dac_max);
+    start_point = start_point - rel_off;
+    
+    
     /* Fill data[] with appropriate buffer samples */
     for(i = 0; i < AWG_SIG_LEN; i++) {
         /* Sine */
@@ -189,6 +196,12 @@ void synthesize_signal(float ampl, float freq, int calib_dc_offs, int calib_fs,
         if (type == eSignalTriangle) {
             data[i] = round(-1.0 * (float)amp *
                      (acos(cos(2*M_PI*(float)i/(float)AWG_SIG_LEN))/M_PI*2-1));
+        }
+        
+        /*Shifted triangle -- Zalivako*/
+        if (type == eSignalTriangleShifted) {
+            data[i] = rel_off + round(-1.0 * (float)amp *
+                     (acos(cos(2*M_PI*(float)i/(float)AWG_SIG_LEN - M_PI/2*(start_point/((float)amp) - 1)))/M_PI*2-1));
         }
     }
 }
@@ -403,7 +416,7 @@ void write_data_fpga(uint32_t ch, int mode, int trigger, const int32_t *data,
         /* Channel A */
         state_machine &= ~0xff;
 
-        g_awg_reg->state_machine_conf = state_machine | 0xC0;
+        g_awg_reg->state_machine_conf = state_machine | 0x40;
         g_awg_reg->cha_scale_off      = awg->offsgain;
         g_awg_reg->cha_count_wrap     = awg->wrap;
         g_awg_reg->cha_count_step     = awg->step;
@@ -419,7 +432,7 @@ void write_data_fpga(uint32_t ch, int mode, int trigger, const int32_t *data,
         /* Channel B */
         state_machine &= ~0xff0000;
 
-        g_awg_reg->state_machine_conf = state_machine | 0xC00000;
+        g_awg_reg->state_machine_conf = state_machine | 0x400000;
         g_awg_reg->chb_scale_off      = awg->offsgain;
         g_awg_reg->chb_count_wrap     = awg->wrap;
         g_awg_reg->chb_count_step     = awg->step;
@@ -496,6 +509,78 @@ int generate_exit(void)
     return 0;
 }
 
+void start_relocking_generation(int channel, int32_t start, float min, float max){
+	awg_param_t ch_params;
+	//synthesising signal
+	synthesize_signal(max-min,
+                          1,
+                          (channel == 0) ? gen_calib_params->be_ch1_dc_offs : gen_calib_params->be_ch2_dc_offs,
+                          (channel == 0) ? gen_calib_params->be_ch1_fs : gen_calib_params->be_ch2_fs,
+                          (channel == 0) ? ch1_max_dac_v : ch2_max_dac_v,
+                          0,
+                          eSignalTriangleShifted, (channel == 0) ? ch1_data : ch2_data, &ch_params, start, (max+min)/2);
+        //apply
+        write_data_fpga(channel, 0,
+                    0,
+                    (channel == 0) ? ch1_data : ch2_data, &ch_params, 0);
+        g_enabled[channel] = 2;
+                    
+}
+
+
+int32_t stop_relocking(int channel){
+	uint32_t read_pointer;
+	int i;
+	int32_t ret_val = 0;
+	awg_param_t ch_params;
+	if (g_enabled[channel] == 2){
+    		ch_params.step = (channel == 0) ? g_awg_reg->cha_count_step : g_awg_reg->chb_count_step;
+    		ch_params.wrap = (channel == 0) ? g_awg_reg->cha_count_wrap : g_awg_reg->chb_count_wrap;
+    		ch_params.offsgain = (channel == 0) ? g_awg_reg->cha_scale_off : g_awg_reg->chb_scale_off;
+		
+		if (channel == 0) g_awg_reg->cha_count_step = 0; else g_awg_reg->chb_count_step = 0;
+		read_pointer = (channel == 0) ? (g_awg_reg->reserved_regs1[0] & 0xFFFF) : (g_awg_reg->reserved_regs2[0] & 0xFFFF);
+		read_pointer = read_pointer >> 2;
+		ret_val = (channel == 0) ? ch1_data[read_pointer] : ch2_data[read_pointer];
+
+    		if (channel == 0){
+    			for(i = 0; i < AWG_SIG_LEN; i++)
+        			ch1_data[i]=ret_val;
+        	} else {
+        		for(i = 0; i < AWG_SIG_LEN; i++)
+        			ch2_data[i]=ret_val;
+        	}
+		write_data_fpga(channel, 0,
+                	0,
+                	(channel == 0) ? ch1_data : ch2_data, &ch_params, 0);
+            	g_enabled[channel] = 0;
+        }
+        return ret_val;
+}
+
+void reset_gen_offset(int channel){
+	int i;
+	awg_param_t ch_params;
+	if (g_enabled[channel] != 1){
+    		ch_params.step = (channel == 0) ? g_awg_reg->cha_count_step : g_awg_reg->chb_count_step;
+    		ch_params.wrap = (channel == 0) ? g_awg_reg->cha_count_wrap : g_awg_reg->chb_count_wrap;
+    		ch_params.offsgain = (channel == 0) ? g_awg_reg->cha_scale_off : g_awg_reg->chb_scale_off;
+		
+		if (channel == 0) g_awg_reg->cha_count_step = 0; else g_awg_reg->chb_count_step = 0;
+
+    		if (channel == 0){
+    			for(i = 0; i < AWG_SIG_LEN; i++)
+        			ch1_data[i]=0;
+        	} else {
+        		for(i = 0; i < AWG_SIG_LEN; i++)
+        			ch2_data[i]=0;
+        	}
+		write_data_fpga(channel, 0,
+                	0,
+                	(channel == 0) ? ch1_data : ch2_data, &ch_params, 0);
+            	g_enabled[channel] = 0;
+     }
+}
 /*----------------------------------------------------------------------------------*/
 /**
  * @brief Update Arbitrary Signal Generator module towards actual settings.
@@ -568,7 +653,7 @@ int generate_update(rp_app_params_t *params)
                               gen_calib_params->be_ch1_fs,
                               ch1_max_dac_v,
                               params[GEN_SIG_DCOFF_CH1].value,
-                              ch1_type, ch1_data, &ch1_param);
+                              ch1_type, ch1_data, &ch1_param,0,0);
             wrap = 0;  // whole buffer used
         } else {
             /* Signal file */
@@ -598,7 +683,7 @@ int generate_update(rp_app_params_t *params)
                               gen_calib_params->be_ch2_fs,
                               ch2_max_dac_v,
                               params[GEN_SIG_DCOFF_CH2].value,
-                              ch2_type, ch2_data, &ch2_param);
+                              ch2_type, ch2_data, &ch2_param,0,0);
             wrap = 0; // whole buffer used
         } else {
             /* Signal file */
@@ -622,8 +707,9 @@ int generate_update(rp_app_params_t *params)
     /* Always return singles to 0 */
     params[GEN_SINGLE_CH1].value = 0;
     params[GEN_SINGLE_CH2].value = 0;
-
-    
+    g_enabled[0] = ch1_enable;
+    g_enabled[1] = ch2_enable;
+    //if (ch1_enable == 1) start_relocking_generation(0,last_val,-1.0,1.0); else last_val=stop_relocking(0);
     //if (invalid_file==1)
     //  return -1;  // Use this return value to notify the GUI user about invalid file. 
     
