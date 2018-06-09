@@ -51,10 +51,12 @@ int locked = 0;	//--Zalivako
 int pid_enabled = 0; // Zalivako
 pid_param_t pid[NUM_OF_PIDS] = {{ 0 }}; //--placed here by Zalivako
 uint32_t pid_configuration = 0;
-int32_t slow_out = 0;
+float slow_out = 0;
 int slow_enabled = 0;
 short slow_counter = 0;
 float slow_k = 0.0;
+int slow_timeout = 0;
+short relock_enabled = 0;
 
 
 /**
@@ -175,13 +177,27 @@ int pid_exit(void)
  */
 int pid_update(rp_app_params_t *params)
 {
-    int i;
-
     uint32_t ireset = 0;
+    short slow_reset=0, relock_reset=0, pid_reset=0; // if some of them were reset
+    
     
     memset(pid, 0, NUM_OF_PIDS*sizeof(pid_param_t));
-
+    
+    //Test if some of these features were switched off
+    if ((pid_enabled == 1) && (params[PID_11_ENABLE].value == 0)) pid_reset=1;
+    if ((slow_enabled == 1) && (params[PID_22_ENABLE].value == 0)) slow_reset=1;
+    if ((slow_enabled == 1) && (params[PID_12_ENABLE].value == 0)) relock_reset=1;
+    
+    slow_enabled = params[PID_22_ENABLE].value;
+    relock_enabled = params[PID_12_ENABLE].value;
+    slow_k = params[PID_22_KP].value;
+    slow_timeout = (int)(params[PID_22_SP].value);
+    pid[3].limit_up = (int)((params[PID_22_LIMIT_UP].value)*max_cnt);   
+    pid[3].limit_low = (int)((params[PID_22_LIMIT_LOW].value)*max_cnt);
+    
         /* PID enabled? */
+    pid_enabled = params[PID_11_ENABLE].value;
+    min_intens_threshold = params[MIN_I_THRESHOLD_1].value; 
     if (params[PID_11_ENABLE].value == 1) {
     	pid[0].gain = (int)((params[PID_11_GAIN].value)*128);  // Fenske (*128 to get integer-value)
     	pid[0].setpoint = (int)(((params[PID_11_SP].value)*max_cnt)); // + dac_dc_offset[i]); // Fenske
@@ -189,7 +205,7 @@ int pid_update(rp_app_params_t *params)
     	pid[0].kp = (int)((params[PID_11_KP].value)*dac_kp_1);  // Fenske
         pid[0].ki = (int)((params[PID_11_KI].value)*norm_int);
         pid[0].kd = (int)((params[PID_11_KD].value)*norm_diff);
-        pid[0].limit_up = (int)((params[PID_11_LIMIT_UP)*max_cnt); // Fenske
+        pid[0].limit_up = (int)((params[PID_11_LIMIT_UP].value)*max_cnt); // Fenske
         pid[0].limit_low = (int)((params[PID_11_LIMIT_LOW].value)*max_cnt); // Fenske
         pid[0].int_limit = (int)((params[PID_11_INT_LIMIT].value)*max_cnt); // Fenske
         pid[0].kii = (int)((params[PID_11_KII].value)*norm_int);
@@ -197,22 +213,22 @@ int pid_update(rp_app_params_t *params)
         if(old_int_limit[0] > params[PID_11_INT_LIMIT].value) { // reset integrator if int_limit is set
        	    g_pid_reg->pid[0].ki = 0;
         }
-        old_int_limit[i] = params[PID_11_INT_LIMIT].value;
+        old_int_limit[0] = params[PID_11_INT_LIMIT].value;
     }
-    else if (params[PID_11_ENABLE].value != 1) {  // added by Fenske (to reset the output if PID is not enabled -------
-        ireset |= 1;
-    }
+    else ireset |= 1;
     
 
     g_pid_reg->pid[0].gain = pid[0].gain;
     g_pid_reg->pid[0].setpoint = pid[0].setpoint;
     g_pid_reg->pid[0].kp = pid[0].kp;
-    g_pid_reg->pid[0].ki = pid[0].ki;
+    if (locked<=RELOCK_TIMEOUT)
+    	g_pid_reg->pid[0].ki = pid[0].ki;
     g_pid_reg->pid[0].kd = pid[0].kd;
     g_pid_reg->pid[0].limit_up = pid[0].limit_up; // ------------------------------------------------ Fenske
     g_pid_reg->pid[0].limit_low = pid[0].limit_low; // ---------------------------------------------- Fenske
     g_pid_reg->pid[0].int_limit = pid[0].int_limit; // Fenske
-    g_pid_reg->pid[0].kii = pid[0].kii;
+    if (locked<=RELOCK_TIMEOUT)
+    	g_pid_reg->pid[0].kii = pid[0].kii;
         
 
     if (params[PID_11_RESET].value == 1) {
@@ -226,23 +242,24 @@ int pid_update(rp_app_params_t *params)
     
     g_pid_reg->configuration = ireset;
 
-    // Threshold for min_intensity goes to local parameter needed by "pid_min_intensity()"
-    min_intens_threshold = params[MIN_I_THRESHOLD_1].value; // --------------- Fenske
-    
-    
-    
-    //Slow integrator parameters
-    if ((params[PID_22_ENABLE].value == 1) && (params[PID_11_ENABLE].value == 1)) {
-    	slow_enabled = 1;
-    	slow_k = params[PID_22_KP].value;
-    } else if (slow_enabled == 1) {
-    	reset_gen_offset(1);
+    //in case if it was relocking when relock mechanism was turned off. We just leave slow out where it was
+    if ((pid_enabled == 1)&&(slow_enabled == 1)&&(relock_reset == 1)&&(locked>RELOCK_TIMEOUT)){
+    	locked = 0;
     	slow_counter = 0;
-    	slow_enabled = 0;
-    	slow_out = 0;	
+    	slow_out = stop_relocking(1);			
+	g_pid_reg->pid[0].ki = pid[0].ki;
+	g_pid_reg->pid[0].kii = pid[0].kii;
     }
-    
-    
+    //in case if slow output or PID control were turned off. Set slow out to zero.
+    if ((slow_reset == 1)||(pid_reset == 1)){
+    	set_channel_output(1, 0);
+    	slow_out = 0;
+    	slow_counter = 0;
+    	locked = 0;
+    	g_pid_reg->pid[0].ki = pid[0].ki;
+	g_pid_reg->pid[0].kii = pid[0].kii;
+    }
+
 
     // Save settings ---------------------------------------------------------------------------- Fenske
     // (for creating files it is necessary to mount the folder on the SD-card writable! see pid_init() )
@@ -287,14 +304,7 @@ int pid_update(rp_app_params_t *params)
         fd = fopen("/opt/redpitaya/www/apps/pid2/power_log.txt", "w");
         fclose(fd);
         
-    }
-    
-    pid_enabled = params[PID_11_ENABLE].value;
-    
-    if ((pid_enabled == 0) && (locked > RELOCK_TIMEOUT)){
-    		locked = 0;
-    }
-    
+    }    
     
     return 0;
 }
@@ -320,61 +330,56 @@ float pid_min_intensity(int channel)
 	channel = channel - 1;
 	rp_AIpinGetValue(channel+2, &intensity); // read XADC2 value
 	intensity = intensity - xadc_offset[channel]; // subtract the offset
-	if (pid_enabled[channel] != 0){
-		if((intensity >= min_intens_threshold[channel])){ // compare the intensity to the threshold
-			if ((locked[channel]>RELOCK_TIMEOUT)){
+	if (channel == 1) return intensity;
+	
+	
+	if ((pid_enabled != 0) && (slow_enabled == 1) && (relock_enabled == 1)){
+		if(intensity >= min_intens_threshold){ // compare the intensity to the threshold
+			if (locked>RELOCK_TIMEOUT){
 				//stopping generator and setting offset to the last generator's value
-				offs = stop_relocking(channel);
-				real_offset[channel] = offs;
-				//correcting output limits according to the offset by generator
-				g_pid_reg->pid[(channel == 0) ? 0 : 3].limit_up = pid[(channel == 0) ? 0 : 3].limit_up - real_offset[channel]; 
-        			g_pid_reg->pid[(channel == 0) ? 0 : 3].limit_low = pid[(channel == 0) ? 0 : 3].limit_low - real_offset[channel];
+				slow_out = stop_relocking(1);
 				
 				//turning integrator back on
-				//g_pid_reg->pid[(channel == 0) ? 0 : 3].kp = pid[(channel == 0) ? 0 : 3].kp;
-				g_pid_reg->pid[(channel == 0) ? 0 : 3].ki = pid[(channel == 0) ? 0 : 3].ki;
-				g_pid_reg->pid[(channel == 0) ? 0 : 3].kii = pid[(channel == 0) ? 0 : 3].kii;
-				//g_pid_reg->configuration = pid_configuration;
+				g_pid_reg->pid[0].ki = pid[0].ki;
+				g_pid_reg->pid[0].kii = pid[0].kii;
 				
-				//logging
-				/*fd = fopen("/opt/redpitaya/www/apps/pid2/debug.txt", "a");
-               			fprintf(fd, "Stopping generator %d!\n", channel+1);
-              			fclose(fd);*/
 			}
-			locked[channel] = 0;
+			locked = 0;
 		}
-		if((min_intens_threshold[channel] < 1) && (intensity < min_intens_threshold[channel])){
-			if (locked[channel] == RELOCK_TIMEOUT){
+		if(intensity < min_intens_threshold){
+			if (locked == RELOCK_TIMEOUT){
 			//time to turn on generator!!!
 				//step one: resetting pid integrator (to prevent it from interfering in relocking proccess)
-				g_pid_reg->pid[(channel == 0) ? 0 : 3].ki = 0;
-				g_pid_reg->pid[(channel == 0) ? 0 : 3].kii = 0;
+				g_pid_reg->pid[0].ki = 0;
+				g_pid_reg->pid[0].kii = 0;
 				//g_pid_reg->configuration = (pid_configuration | (1 <<  ((channel == 0) ? 0 : 3)));
 				
-				//step two: storing current value of the pid output (relative to the offset) we need to convert it to a proper 32 bit signed int
-				pid_out_before_relock[channel] = (int32_t)(g_pid_reg->meas[channel].o & 0x3FFF);
-				if (pid_out_before_relock[channel] & (1<<13)) {
-					//value is negative. We need to fill all other bits on the left with ones as yet it is signed 14-bit value
-					pid_out_before_relock[channel] |= (uint32_t) (~0x3FFF);
-				}
-				
-				
-				
-				offs = real_offset[channel];
-				
-				up = pid[(channel == 0) ? 0 : 3].limit_up;
-				low = pid[(channel == 0) ? 0 : 3].limit_low;
+				up = pid[3].limit_up;
+				low = pid[3].limit_low;
 				
 				//step three: starting generator from the initial position of the pid controller scanning all with triangles
-				start_relocking_generation(channel, pid_out_before_relock[channel]+offs, low/max_cnt,up/max_cnt);
-				//if (channel == 0) g_pid_reg->out_1_offset = 0; else g_pid_reg->out_2_offset = 0;
-              			/*fd = fopen("/opt/redpitaya/www/apps/pid2/debug.txt", "a");
-              			fprintf(fd, "Starting generator %d!\nout: %d, min: %f, max: %f\n", channel+1,pid_out_before_relock[channel], (low)/max_cnt,(up)/max_cnt);
-              			fclose(fd);*/	
-               			locked[channel]++;
+				start_relocking_generation(1, slow_out, low/max_cnt,up/max_cnt);
+
+               			locked++;
+               			slow_counter = 0;
 			} 
-			if (locked[channel] <= RELOCK_TIMEOUT) locked[channel]++;
+			if (locked <= RELOCK_TIMEOUT) locked++;
 		}
+	}
+	
+	if ((pid_enabled == 1) && (slow_enabled == 1) && (locked<=RELOCK_TIMEOUT)){
+		if (slow_counter >= slow_timeout) {
+			slow_counter = 0;
+			offs = (int32_t)(g_pid_reg->meas[0].i & 0x3FFF);
+			if (offs & (1<<13)) {
+				//value is negative. We need to fill all other bits on the left with ones as yet it is signed 14-bit value
+				offs |= (uint32_t) (~0x3FFF);
+			}
+			slow_out = slow_out + slow_k*offs;
+			if (slow_out>pid[3].limit_up) slow_out = pid[3].limit_up;
+			if (slow_out<pid[3].limit_low) slow_out = pid[3].limit_low;
+			set_channel_output(1, slow_out);
+		} else slow_counter++;
 	}
 	
 	

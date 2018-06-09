@@ -527,34 +527,39 @@ void start_relocking_generation(int channel, int32_t start, float min, float max
                     
 }
 
+void set_channel_output(int channel, int32_t value){
+    uint32_t state_machine = g_awg_reg->state_machine_conf;
+    
+    
+    if (channel == 0){
+        state_machine &= ~0xff;
+        //Stop generator
+        g_awg_reg->state_machine_conf = state_machine | 0x40;
+        //Set first data array element to required value
+        g_awg_cha_mem[0] = value;
+        //Start state machine with single trigger
+        g_awg_reg->state_machine_conf = state_machine | 0x21;
+    } else {
+    	state_machine &= ~0xff0000;
+    	//Stop generator
+        g_awg_reg->state_machine_conf = state_machine | 0x400000;
+        //Set first data array element to required value
+        g_awg_cha_mem[0] = value;
+        //Start state machine with single trigger
+        g_awg_reg->state_machine_conf = state_machine | 0x210000;
+    }
+}
 
 int32_t stop_relocking(int channel){
 	uint32_t read_pointer;
-	int i;
 	int32_t ret_val = 0;
-	awg_param_t ch_params;
-	if (g_enabled[channel] == 2){
-    		ch_params.step = (channel == 0) ? g_awg_reg->cha_count_step : g_awg_reg->chb_count_step;
-    		ch_params.wrap = (channel == 0) ? g_awg_reg->cha_count_wrap : g_awg_reg->chb_count_wrap;
-    		ch_params.offsgain = (channel == 0) ? g_awg_reg->cha_scale_off : g_awg_reg->chb_scale_off;
 		
-		if (channel == 0) g_awg_reg->cha_count_step = 0; else g_awg_reg->chb_count_step = 0;
-		read_pointer = (channel == 0) ? (g_awg_reg->reserved_regs1[0] & 0xFFFF) : (g_awg_reg->reserved_regs2[0] & 0xFFFF);
-		read_pointer = read_pointer >> 2;
-		ret_val = (channel == 0) ? ch1_data[read_pointer] : ch2_data[read_pointer];
+	if (channel == 0) g_awg_reg->cha_count_step = 0; else g_awg_reg->chb_count_step = 0;
+	read_pointer = (channel == 0) ? (g_awg_reg->reserved_regs1[0] & 0xFFFF) : (g_awg_reg->reserved_regs2[0] & 0xFFFF);
+	read_pointer = read_pointer >> 2;
+	ret_val = (channel == 0) ? ch1_data[read_pointer] : ch2_data[read_pointer];
 
-    		if (channel == 0){
-    			for(i = 0; i < AWG_SIG_LEN; i++)
-        			ch1_data[i]=ret_val;
-        	} else {
-        		for(i = 0; i < AWG_SIG_LEN; i++)
-        			ch2_data[i]=ret_val;
-        	}
-		write_data_fpga(channel, 0,
-                	0,
-                	(channel == 0) ? ch1_data : ch2_data, &ch_params, 0);
-            	g_enabled[channel] = 0;
-        }
+    	set_channel_output(channel, ret_val);
         return ret_val;
 }
 

@@ -43,6 +43,7 @@ typedef struct awg_param_s {
 
 void start_relocking_generation(int channel, int32_t start, float min, float max);
 void reset_gen_offset(int channel);
+void set_channel_output(int channel, int32_t value);
 int generate_init(rp_calib_params_t *calib_params);
 int generate_exit(void);
 
