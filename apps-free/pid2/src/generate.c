@@ -544,7 +544,7 @@ void set_channel_output(int channel, int32_t value){
     	//Stop generator
         g_awg_reg->state_machine_conf = state_machine | 0x400000;
         //Set first data array element to required value
-        g_awg_cha_mem[0] = value;
+        g_awg_chb_mem[0] = value;
         //Start state machine with single trigger
         g_awg_reg->state_machine_conf = state_machine | 0x210000;
     }

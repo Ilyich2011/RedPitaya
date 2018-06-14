@@ -342,9 +342,9 @@ static rp_app_params_t rp_main_params[PARAMS_NUM+1] = {
 	{ /* pid_NN_sp - PID NN Input-master-gain. */
 		"pid_22_gain",  1, 1, 0, -10, 10 },
 	{ /* pid_NN_sp - PID NN set-point in V. */
-		"pid_22_sp",  0, 1, 0, -1, 1 }, // -8192, 8191 },
+		"pid_22_sp",  0, 1, 0, 0.1, 10 }, // -8192, 8191 },
 	{ /* pid_NN_kp - PID NN proportional gain Kp ------------- Fenske */
-		"pid_22_kp",  0, 1, 0, -10, 10 },
+		"pid_22_kp",  0, 1, 0, -1000, 1000 },
 	{ /* pid_NN_ki - PID NN integral gain     Ki in 1/ms. ------------------------------- Fenske*/
 		"pid_22_ki",  0, 1, 0, -3600, 3600 },
 	{ /* pid_NN_kd - PID NN derivative gain   Kd in ns. ------------------------------- Fenske*/

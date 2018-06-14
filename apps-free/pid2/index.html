@@ -1387,9 +1387,10 @@
         $('#apply_pid_22_sp').show();
 		$(this).bind('mousewheel', function(event, delta) {
 			if(delta > 0)
-				params.local.pid_22_sp += 0.01;
+				params.local.pid_22_sp += 0.1;
 			else
-				params.local.pid_22_sp -= 0.01;	
+				if (params.local.pid_22_sp > 0.1)
+					params.local.pid_22_sp -= 0.1;	
 			return false;
 		})
       })
@@ -3995,15 +3996,73 @@ var info_ch2_o_neg = 0;
                   <div style="padding: 7px 0 0;" class="col-xs-2" id="pid_11_limit_units">V</div>
                 </div>
               </form>
-			  </div> <!-- end simple collapsible by Fenske --------------------------------------->
-				<div id="pid_12_btn" class="collapse">
-			  <form class="form-horizontal" role="form" onsubmit="return false;">
+              <form class="form-horizontal" role="form" onsubmit="return false;">
                 <div class="checkbox" style="padding-bottom: 12px;">
                   <label class="group-label">
-                    <input type="checkbox" id="pid_12_enable" checked> PID 12 enable
+                    <input type="checkbox" id="pid_22_enable" checked> Slow loop enable
                   </label>
                 </div>
               </form>
+              <form class="form-horizontal" role="form" onsubmit="return false;">
+                <div class="checkbox" style="padding-bottom: 12px;">
+                  <label class="group-label">
+                    <input type="checkbox" id="pid_12_enable" checked> Relock enable
+                  </label>
+                </div>
+              </form>
+              <form class="form-horizontal" role="form" onsubmit="return false;">
+                <div class="form-group">
+                  <label for="pid_22_limit_up" class="col-xs-4 control-label">Slow upper limit:</label>
+                  <div class="col-xs-4 col-sm-5">
+                    <input type="text" autocomplete="off" class="form-control" value="0" id="pid_22_limit_up">
+                    <span style="display: none;" class="input-group-btn" id="apply_pid_22_limit_up">
+                      <button type="button" class="btn btn-primary btn-lg"><span class="glyphicon glyphicon-ok-circle"></span></button>
+                    </span>
+                  </div>
+                  <div style="padding: 7px 0 0;" class="col-xs-2" id="pid_22_limit_units">V</div>
+                </div>
+              </form>
+			  <form class="form-horizontal" role="form" onsubmit="return false;">
+                <div class="form-group">
+                  <label for="pid_22_limit_low" class="col-xs-4 control-label">Slow lower limit:</label>
+                  <div class="col-xs-4 col-sm-5">
+                    <input type="text" autocomplete="off" class="form-control" value="0" id="pid_22_limit_low">
+                    <span style="display: none;" class="input-group-btn" id="apply_pid_22_limit_low">
+                      <button type="button" class="btn btn-primary btn-lg"><span class="glyphicon glyphicon-ok-circle"></span></button>
+                    </span>
+                  </div>
+                  <div style="padding: 7px 0 0;" class="col-xs-2" id="pid_22_limit_units">V</div>
+                </div>
+              </form>
+              <form class="form-horizontal" role="form" onsubmit="return false;">
+                <div class="form-group">
+                  <label for="pid_22_kp" class="col-xs-4 control-label">Slow k:</label>
+                  <div class="col-xs-4 col-sm-5">
+                    <input type="text" autocomplete="off" class="form-control" value="0" id="pid_22_kp">
+                    <span style="display: none;" class="input-group-btn" id="apply_pid_22_kp">
+                      <button type="button" class="btn btn-primary btn-lg"><span class="glyphicon glyphicon-ok-circle"></span></button>
+                    </span>
+                  </div>
+                  <div style="padding: 7px 0 0;" class="col-xs-2" id="pid_22_kp_units"> </div>
+                </div>
+              </form>
+              <form class="form-horizontal" role="form" onsubmit="return false;">
+                <div class="form-group">
+                  <label for="pid_22_sp" class="col-xs-4 control-label">Update interval:</label>
+                  <div class="col-xs-4 col-sm-5">
+                    <input type="text" autocomplete="off" class="form-control" value="1.0" id="pid_22_sp">
+                    <span style="display: none;" class="input-group-btn" id="apply_pid_22_sp">
+                      <button type="button" class="btn btn-primary btn-lg"><span class="glyphicon glyphicon-ok-circle"></span></button>
+                    </span>
+                  </div>
+                  <div style="padding: 7px 0 0;" class="col-xs-2" id="pid_22_sp_units">s</div>
+                </div>
+              </form>
+              
+              
+	     </div> <!-- end simple collapsible by Fenske --------------------------------------->
+	     <div id="pid_12_btn" class="collapse">
+			 
               <form class="form-horizontal" role="form" onsubmit="return false;">
                 <div class="checkbox" style="padding-bottom: 12px;">
                   <label class="group-label">
@@ -4263,13 +4322,7 @@ var info_ch2_o_neg = 0;
               </form>
 			 </div> <!-- end simple collapsible by Fenske --------------------------------------->          
 				<div id="pid_22_btn" class="collapse">
-              <form class="form-horizontal" role="form" onsubmit="return false;">
-                <div class="checkbox" style="padding-bottom: 12px;">
-                  <label class="group-label">
-                    <input type="checkbox" id="pid_22_enable" checked> PID 22 enable
-                  </label>
-                </div>
-              </form>
+           
               <form class="form-horizontal" role="form" onsubmit="return false;">
                 <div class="checkbox" style="padding-bottom: 12px;">
                   <label class="group-label">
@@ -4295,30 +4348,6 @@ var info_ch2_o_neg = 0;
                     </span>
                   </div>
                   <div style="padding: 7px 0 0;" class="col-xs-2" id="pid_22_gain_units"> </div>
-                </div>
-              </form>
-              <form class="form-horizontal" role="form" onsubmit="return false;">
-                <div class="form-group">
-                  <label for="pid_22_sp" class="col-xs-4 control-label">Setpoint:</label>
-                  <div class="col-xs-4 col-sm-5">
-                    <input type="text" autocomplete="off" class="form-control" value="0" id="pid_22_sp">
-                    <span style="display: none;" class="input-group-btn" id="apply_pid_22_sp">
-                      <button type="button" class="btn btn-primary btn-lg"><span class="glyphicon glyphicon-ok-circle"></span></button>
-                    </span>
-                  </div>
-                  <div style="padding: 7px 0 0;" class="col-xs-2" id="pid_22_sp_units">V</div>
-                </div>
-              </form>
-              <form class="form-horizontal" role="form" onsubmit="return false;">
-                <div class="form-group">
-                  <label for="pid_22_kp" class="col-xs-4 control-label">Kp:</label>
-                  <div class="col-xs-4 col-sm-5">
-                    <input type="text" autocomplete="off" class="form-control" value="0" id="pid_22_kp">
-                    <span style="display: none;" class="input-group-btn" id="apply_pid_22_kp">
-                      <button type="button" class="btn btn-primary btn-lg"><span class="glyphicon glyphicon-ok-circle"></span></button>
-                    </span>
-                  </div>
-                  <div style="padding: 7px 0 0;" class="col-xs-2" id="pid_22_kp_units"> </div>
                 </div>
               </form>
               <form class="form-horizontal" role="form" onsubmit="return false;">
@@ -4369,31 +4398,7 @@ var info_ch2_o_neg = 0;
                   <div style="padding: 7px 0 0;" class="col-xs-2" id="pid_22_kd_units">ns</div>
                 </div>
               </form>
-			  <!------- 22-Limit Button added by Fenske------------------------------------------------------>
-			  <form class="form-horizontal" role="form" onsubmit="return false;">
-                <div class="form-group">
-                  <label for="pid_22_limit_up" class="col-xs-4 control-label">upper limit:</label>
-                  <div class="col-xs-4 col-sm-5">
-                    <input type="text" autocomplete="off" class="form-control" value="0" id="pid_22_limit_up">
-                    <span style="display: none;" class="input-group-btn" id="apply_pid_22_limit_up">
-                      <button type="button" class="btn btn-primary btn-lg"><span class="glyphicon glyphicon-ok-circle"></span></button>
-                    </span>
-                  </div>
-                  <div style="padding: 7px 0 0;" class="col-xs-2" id="pid_22_limit_units">V</div>
-                </div>
-              </form>
-			  <form class="form-horizontal" role="form" onsubmit="return false;">
-                <div class="form-group">
-                  <label for="pid_22_limit_low" class="col-xs-4 control-label">lower limit:</label>
-                  <div class="col-xs-4 col-sm-5">
-                    <input type="text" autocomplete="off" class="form-control" value="0" id="pid_22_limit_low">
-                    <span style="display: none;" class="input-group-btn" id="apply_pid_22_limit_low">
-                      <button type="button" class="btn btn-primary btn-lg"><span class="glyphicon glyphicon-ok-circle"></span></button>
-                    </span>
-                  </div>
-                  <div style="padding: 7px 0 0;" class="col-xs-2" id="pid_22_limit_units">V</div>
-                </div>
-              </form>
+			  
 			  </div>
 			  <div>
 			  PID (Output/Input)
@@ -4431,7 +4436,7 @@ var info_ch2_o_neg = 0;
 			  </div>
 			  <form class="form-horizontal" role="form" onsubmit="return false;">
                 <div class="form-group">
-                  <label for="min_i_threshold_1" class="col-xs-4 control-label">Threshold 1:</label>
+                  <label for="min_i_threshold_1" class="col-xs-4 control-label">Threshold:</label>
                   <div class="col-xs-4 col-sm-5">
                     <input type="text" autocomplete="off" class="form-control" value="0" id="min_i_threshold_1">
                     <span style="display: none;" class="input-group-btn" id="apply_min_i_threshold_1">
@@ -4441,7 +4446,7 @@ var info_ch2_o_neg = 0;
                   <div style="padding: 7px 0 0;" class="col-xs-2" id="threshold_units">V</div>
                 </div>
               </form>
-			  <form class="form-horizontal" role="form" onsubmit="return false;">
+			  <form class="collapse" role="form" onsubmit="return false;">
                 <div class="form-group">
                   <label for="min_i_threshold_2" class="col-xs-4 control-label">Threshold 2:</label>
                   <div class="col-xs-4 col-sm-5">
@@ -4454,10 +4459,10 @@ var info_ch2_o_neg = 0;
                 </div>
               </form>
 			  <div class="row">
-                <div class="col-xs-3 txt-right">Intensity 1:</div>
+                <div class="col-xs-3 txt-right">Intensity:</div>
                 <div class="col-xs-3"><span id="info_min_intens_1">-</span><span class="unit">V</span></div>
-                <div class="col-xs-3 txt-right">Intensity 2:</div>
-                <div class="col-xs-3"><span id="info_min_intens_2">-</span><span class="unit">V</span></div>
+                <div class="collapse">Intensity 2:</div>
+                <div class="collapse"><span id="info_min_intens_2">-</span><span class="unit">V</span></div>
 			  </div>
 			  <hr />
 			  <!------- Save and load settings buttons added by Fenske----------------------------------------------------->

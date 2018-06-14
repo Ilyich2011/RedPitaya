@@ -191,7 +191,7 @@ int pid_update(rp_app_params_t *params)
     slow_enabled = params[PID_22_ENABLE].value;
     relock_enabled = params[PID_12_ENABLE].value;
     slow_k = params[PID_22_KP].value;
-    slow_timeout = (int)(params[PID_22_SP].value);
+    slow_timeout = (int)(params[PID_22_SP].value/0.025);
     pid[3].limit_up = (int)((params[PID_22_LIMIT_UP].value)*max_cnt);   
     pid[3].limit_low = (int)((params[PID_22_LIMIT_LOW].value)*max_cnt);
     
@@ -312,11 +312,19 @@ int pid_update(rp_app_params_t *params)
 // Reads measure values for P, I, D and Output from FPGA
 int pid_update_meas_output(rp_osc_meas_res_t *ch_meas, int channel)  // bar graph data ---------- Fenske
 {
-	ch_meas->p = g_pid_reg->meas[channel-1].p;
-	ch_meas->i = g_pid_reg->meas[channel-1].i;
-	ch_meas->d = g_pid_reg->meas[channel-1].d;
-	ch_meas->o = g_pid_reg->meas[channel-1].o;
-	ch_meas->min_intensity = pid_min_intensity(channel);
+	if (channel == 1){
+		ch_meas->p = g_pid_reg->meas[channel-1].p;
+		ch_meas->i = g_pid_reg->meas[channel-1].i;
+		ch_meas->d = g_pid_reg->meas[channel-1].d;
+		ch_meas->o = g_pid_reg->meas[channel-1].o;
+		ch_meas->min_intensity = pid_min_intensity(channel);
+	} else {
+		ch_meas->p = 0;
+		ch_meas->i = 0;
+		ch_meas->d = 0;
+		ch_meas->o = (int) slow_out;
+		ch_meas->min_intensity = pid_min_intensity(channel);
+	}
 	return 0;
 }
 
