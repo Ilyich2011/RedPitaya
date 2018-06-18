@@ -21,5 +21,6 @@ int pid_exit(void);
 int pid_update(rp_app_params_t *params);
 int pid_update_meas_output(rp_osc_meas_res_t *ch_meas, int channel); // bar graph -------------- Fenske
 float pid_min_intensity(int channel); // compares min_intensity input to threshold  -------------- Fenske
+void pid_set_me_val(int32_t val);
 
 #endif // __PID_H

@@ -57,7 +57,7 @@ short slow_counter = 0;
 float slow_k = 0.0;
 int slow_timeout = 0;
 short relock_enabled = 0;
-
+float retval = 0.0;
 
 /**
  * GENERAL DESCRIPTION:
@@ -100,6 +100,11 @@ short relock_enabled = 0;
  * @retval     -1 failure, error message is reported on standard error
  * @retval      0 successful initialization
  */
+
+
+void pid_set_me_val(int32_t val){
+	retval = val;
+}
 
 int pid_init(void)
 {
@@ -175,6 +180,16 @@ int pid_exit(void)
  * @retval -1 failure, error message is repoted on standard error device
  * @retval  0 succesful update
  */
+
+int32_t zal_restore_signed_value(int32_t val){
+	val = val & 0x3FFF;
+	if (val & (1<<13)) {
+		//value is negative. We need to fill all other bits on the left with ones as yet it is signed 14-bit value
+		val |= (uint32_t) (~0x3FFF);
+	}
+	return val;
+}
+
 int pid_update(rp_app_params_t *params)
 {
     uint32_t ireset = 0;
@@ -190,8 +205,8 @@ int pid_update(rp_app_params_t *params)
     
     slow_enabled = params[PID_22_ENABLE].value;
     relock_enabled = params[PID_12_ENABLE].value;
-    slow_k = params[PID_22_KP].value;
     slow_timeout = (int)(params[PID_22_SP].value/0.025);
+    slow_k = params[PID_22_KP].value/100;
     pid[3].limit_up = (int)((params[PID_22_LIMIT_UP].value)*max_cnt);   
     pid[3].limit_low = (int)((params[PID_22_LIMIT_LOW].value)*max_cnt);
     
@@ -246,7 +261,7 @@ int pid_update(rp_app_params_t *params)
     if ((pid_enabled == 1)&&(slow_enabled == 1)&&(relock_reset == 1)&&(locked>RELOCK_TIMEOUT)){
     	locked = 0;
     	slow_counter = 0;
-    	slow_out = stop_relocking(1);			
+    	slow_out = zal_restore_signed_value(stop_relocking(1));			
 	g_pid_reg->pid[0].ki = pid[0].ki;
 	g_pid_reg->pid[0].kii = pid[0].kii;
     }
@@ -322,8 +337,9 @@ int pid_update_meas_output(rp_osc_meas_res_t *ch_meas, int channel)  // bar grap
 		ch_meas->p = 0;
 		ch_meas->i = 0;
 		ch_meas->d = 0;
-		ch_meas->o = (int) slow_out;
-		ch_meas->min_intensity = pid_min_intensity(channel);
+		ch_meas->o = ((int) slow_out) & 0x3FFF;
+		ch_meas->min_intensity = 0;
+		pid_min_intensity(channel);
 	}
 	return 0;
 }
@@ -345,7 +361,7 @@ float pid_min_intensity(int channel)
 		if(intensity >= min_intens_threshold){ // compare the intensity to the threshold
 			if (locked>RELOCK_TIMEOUT){
 				//stopping generator and setting offset to the last generator's value
-				slow_out = stop_relocking(1);
+				slow_out = zal_restore_signed_value(stop_relocking(1));
 				
 				//turning integrator back on
 				g_pid_reg->pid[0].ki = pid[0].ki;
@@ -366,7 +382,7 @@ float pid_min_intensity(int channel)
 				low = pid[3].limit_low;
 				
 				//step three: starting generator from the initial position of the pid controller scanning all with triangles
-				start_relocking_generation(1, slow_out, low/max_cnt,up/max_cnt);
+				start_relocking_generation(1, slow_out, low/(max_cnt+1),up/(max_cnt+1));
 
                			locked++;
                			slow_counter = 0;
@@ -378,12 +394,9 @@ float pid_min_intensity(int channel)
 	if ((pid_enabled == 1) && (slow_enabled == 1) && (locked<=RELOCK_TIMEOUT)){
 		if (slow_counter >= slow_timeout) {
 			slow_counter = 0;
-			offs = (int32_t)(g_pid_reg->meas[0].i & 0x3FFF);
-			if (offs & (1<<13)) {
-				//value is negative. We need to fill all other bits on the left with ones as yet it is signed 14-bit value
-				offs |= (uint32_t) (~0x3FFF);
-			}
+			offs = zal_restore_signed_value(g_pid_reg->meas[0].i);
 			slow_out = slow_out + slow_k*offs;
+			retval = zal_restore_signed_value(pid[3].limit_low);
 			if (slow_out>pid[3].limit_up) slow_out = pid[3].limit_up;
 			if (slow_out<pid[3].limit_low) slow_out = pid[3].limit_low;
 			set_channel_output(1, slow_out);

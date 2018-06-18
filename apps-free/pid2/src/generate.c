@@ -21,6 +21,7 @@
 
 #include "generate.h"
 #include "fpga_awg.h"
+#include "pid.h"
 
 /**
  * GENERAL DESCRIPTION:
@@ -513,7 +514,7 @@ void start_relocking_generation(int channel, int32_t start, float min, float max
 	awg_param_t ch_params;
 	//synthesising signal
 	synthesize_signal(max-min,
-                          1,
+                          0.1,
                           (channel == 0) ? gen_calib_params->be_ch1_dc_offs : gen_calib_params->be_ch2_dc_offs,
                           (channel == 0) ? gen_calib_params->be_ch1_fs : gen_calib_params->be_ch2_fs,
                           (channel == 0) ? ch1_max_dac_v : ch2_max_dac_v,
@@ -530,35 +531,55 @@ void start_relocking_generation(int channel, int32_t start, float min, float max
 void set_channel_output(int channel, int32_t value){
     uint32_t state_machine = g_awg_reg->state_machine_conf;
     
-    
     if (channel == 0){
         state_machine &= ~0xff;
-        //Stop generator
-        g_awg_reg->state_machine_conf = state_machine | 0x40;
+    	//Stop generator
+        g_awg_reg->state_machine_conf 	= 	state_machine | 0x40;
+        g_awg_reg->cha_scale_off      	= 	(gen_calib_params->be_ch1_dc_offs << 16) | 0x2000;
+        g_awg_reg->cha_count_wrap    	= 	1000;//round(65536 * (AWG_SIG_LEN - 1));
+        g_awg_reg->cha_count_step     	= 	9;		
+        g_awg_reg->cha_start_off      	= 	0;
+        
         //Set first data array element to required value
-        g_awg_cha_mem[0] = value;
+        g_awg_cha_mem[0] = value & 0x3FFF;
+
         //Start state machine with single trigger
-        g_awg_reg->state_machine_conf = state_machine | 0x21;
+        g_awg_reg->state_machine_conf = state_machine | 0x11;
     } else {
     	state_machine &= ~0xff0000;
     	//Stop generator
-        g_awg_reg->state_machine_conf = state_machine | 0x400000;
+        g_awg_reg->state_machine_conf 	= 	state_machine | 0x400000;
+        g_awg_reg->chb_scale_off      	= 	(gen_calib_params->be_ch2_dc_offs << 16) | 0x2000;
+        g_awg_reg->chb_count_wrap     	= 	1000;///round(65536 * (AWG_SIG_LEN - 1));
+        g_awg_reg->chb_count_step     	= 	9;		
+        g_awg_reg->chb_start_off      	= 	0;
+        
         //Set first data array element to required value
-        g_awg_chb_mem[0] = value;
+        g_awg_chb_mem[0] = value & 0x3FFF;
+
         //Start state machine with single trigger
-        g_awg_reg->state_machine_conf = state_machine | 0x210000;
+        g_awg_reg->state_machine_conf = state_machine | 0x110000;
     }
 }
 
 int32_t stop_relocking(int channel){
 	uint32_t read_pointer;
 	int32_t ret_val = 0;
+	uint32_t state_machine = g_awg_reg->state_machine_conf;
 		
-	if (channel == 0) g_awg_reg->cha_count_step = 0; else g_awg_reg->chb_count_step = 0;
+	//if (channel == 0) g_awg_reg->cha_count_step = 0; else g_awg_reg->chb_count_step = 0;
+	if (channel == 0){
+        	state_machine &= ~0xff;
+        	g_awg_reg->state_machine_conf 	= 	state_machine | 0x40;
+        } else {
+        	state_machine &= ~0xff0000;
+        	g_awg_reg->state_machine_conf 	= 	state_machine | 0x400000;
+        }
+	
 	read_pointer = (channel == 0) ? (g_awg_reg->reserved_regs1[0] & 0xFFFF) : (g_awg_reg->reserved_regs2[0] & 0xFFFF);
 	read_pointer = read_pointer >> 2;
 	ret_val = (channel == 0) ? ch1_data[read_pointer] : ch2_data[read_pointer];
-
+        //ret_val+=1000; 
     	set_channel_output(channel, ret_val);
         return ret_val;
 }

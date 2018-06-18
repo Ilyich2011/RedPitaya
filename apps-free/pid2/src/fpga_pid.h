@@ -65,8 +65,8 @@ typedef struct {
          *  bits [31:14] - Reserved
          *  bit  [13: 0] - Limit (signed)
          */
-    uint32_t limit_up; // --------------------------------------------------------- Fenske
-    uint32_t limit_low; // --------------------------------------------------------- Fenske
+    int32_t limit_up; // --------------------------------------------------------- Fenske
+    int32_t limit_low; // --------------------------------------------------------- Fenske
     uint32_t int_limit; // integrator limit
     /** @brief offset see MM - SECOND Integral gain
      *
