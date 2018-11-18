@@ -48,7 +48,7 @@ int old_setpoint[] = {0, 0, 0, 0}; // saves the old_setpoint value
 //int wwp1 = 0;		//--Zalivako
 //int wwp2 = 0;   	//--Zalivako
 int locked[] = {0, 0};	//--Zalivako
-int pid_enabled[] = {0, 0}; // Zalivako
+int pid_enabled[] = {0, 0, 0, 0}; // Zalivako
 pid_param_t pid[NUM_OF_PIDS] = {{ 0 }}; //--placed here by Zalivako
 uint32_t pid_configuration = 0;
 int32_t pid_out_before_relock[] = {0, 0};
@@ -183,11 +183,11 @@ int pid_update(rp_app_params_t *params)
         }
         else if (params[PID_11_ENABLE + i * PARAMS_PER_PID].value != 1) {  // added by Fenske (to reset the output if PID is not enabled -------
             ireset |= (1 << i);
-            if (i == 0){
+            if ((i == 2) || (i == 0)){
             	reset_gen_offset(0);
             	real_offset[0] = 0;
             }
-            if (i == 3){
+            if ((i == 1) || (i == 3)){
             	reset_gen_offset(1);
             	real_offset[1] = 0;
             }
@@ -198,8 +198,8 @@ int pid_update(rp_app_params_t *params)
         g_pid_reg->pid[i].kp = pid[i].kp;
         g_pid_reg->pid[i].ki = pid[i].ki;
         g_pid_reg->pid[i].kd = pid[i].kd;
-        g_pid_reg->pid[i].limit_up = pid[i].limit_up - ((i == 0) ? real_offset[0] : 0) - ((i == 3) ? real_offset[1] : 0); // ------------------------------------------------ Fenske
-        g_pid_reg->pid[i].limit_low = pid[i].limit_low - ((i == 0) ? real_offset[0] : 0) - ((i == 3) ? real_offset[1] : 0); // ---------------------------------------------- Fenske
+        g_pid_reg->pid[i].limit_up = pid[i].limit_up - ((i == 2) ? real_offset[0] : 0) - ((i == 1) ? real_offset[1] : 0); // ------------------------------------------------ Fenske
+        g_pid_reg->pid[i].limit_low = pid[i].limit_low - ((i == 2) ? real_offset[0] : 0) - ((i == 1) ? real_offset[1] : 0); // ---------------------------------------------- Fenske
         g_pid_reg->pid[i].int_limit = pid[i].int_limit; // Fenske
         g_pid_reg->pid[i].kii = pid[i].kii;
         
@@ -273,9 +273,11 @@ int pid_update(rp_app_params_t *params)
     
     pid_enabled[0] = params[PID_11_ENABLE + 0 * PARAMS_PER_PID].value;
     pid_enabled[1] = params[PID_11_ENABLE + 3 * PARAMS_PER_PID].value;
+    pid_enabled[2] = params[PID_11_ENABLE + 2 * PARAMS_PER_PID].value;
+    pid_enabled[3] = params[PID_11_ENABLE + 1 * PARAMS_PER_PID].value;
     
     for (i = 0; i<2; i++)
-    	if ((pid_enabled[i] == 0) && (locked[i] > RELOCK_TIMEOUT)){
+    	if (((pid_enabled[i] == 0) || (pid_enabled[i+2] == 0)) && (locked[i] > RELOCK_TIMEOUT)){
     		//stop_relocking(i);
     		locked[i] = 0;
     	}
@@ -305,12 +307,12 @@ int pid_update_meas_output(rp_osc_meas_res_t *ch_meas, int channel)  // bar grap
 float pid_min_intensity(int channel)
 {
 	float intensity = 0;
-	float intensity2 = 0;
 	int32_t offs = 0;
 	int32_t up = 0;
-	int i = 0;
 	int32_t low = 0;
+	int channelu = channel % 2;	
 	channel = channel - 1;
+	
 	rp_AIpinGetValue(channel+2, &intensity); // read XADC2 value
 	intensity = intensity - xadc_offset[channel]; // subtract the offset
 	if (pid_enabled[channel] != 0){
@@ -320,73 +322,45 @@ float pid_min_intensity(int channel)
 				offs = stop_relocking(channel);
 				real_offset[channel] = offs;
 				//correcting output limits according to the offset by generator
-				g_pid_reg->pid[(channel == 0) ? 0 : 3].limit_up = pid[(channel == 0) ? 0 : 3].limit_up - real_offset[channel]; 
-        			g_pid_reg->pid[(channel == 0) ? 0 : 3].limit_low = pid[(channel == 0) ? 0 : 3].limit_low - real_offset[channel];
+				g_pid_reg->pid[(channel == 0) ? 2 : 1].limit_up = pid[(channel == 0) ? 2 : 1].limit_up - real_offset[channel]; 
+        			g_pid_reg->pid[(channel == 0) ? 2 : 1].limit_low = pid[(channel == 0) ? 2 : 1].limit_low - real_offset[channel];
 				
 				//turning integrator back on
-				//g_pid_reg->pid[(channel == 0) ? 0 : 3].kp = pid[(channel == 0) ? 0 : 3].kp;
-				g_pid_reg->pid[(channel == 0) ? 0 : 3].ki = pid[(channel == 0) ? 0 : 3].ki;
-				g_pid_reg->pid[(channel == 0) ? 0 : 3].kii = pid[(channel == 0) ? 0 : 3].kii;
-				//g_pid_reg->configuration = pid_configuration;
-				
-				//logging
-				/*fd = fopen("/opt/redpitaya/www/apps/pid2/debug.txt", "a");
-               			fprintf(fd, "Stopping generator %d!\n", channel+1);
-              			fclose(fd);*/
+
+				g_pid_reg->pid[(channel == 0) ? 2 : 1].ki = pid[(channel == 0) ? 2 : 1].ki;
+				g_pid_reg->pid[(channel == 0) ? 2 : 1].kii = pid[(channel == 0) ? 2 : 1].kii;
 			}
 			locked[channel] = 0;
 		}
 		if((min_intens_threshold[channel] < 1) && (intensity < min_intens_threshold[channel])){
 			if (locked[channel] == RELOCK_TIMEOUT){
 			//time to turn on generator!!!
-				//step one: resetting pid integrator (to prevent it from interfering in relocking proccess)
-				g_pid_reg->pid[(channel == 0) ? 0 : 3].ki = 0;
-				g_pid_reg->pid[(channel == 0) ? 0 : 3].kii = 0;
-				//g_pid_reg->configuration = (pid_configuration | (1 <<  ((channel == 0) ? 0 : 3)));
 				
-				//step two: storing current value of the pid output (relative to the offset) we need to convert it to a proper 32 bit signed int
-				pid_out_before_relock[channel] = (int32_t)(g_pid_reg->meas[channel].o & 0x3FFF);
+				pid_out_before_relock[channel] = (int32_t)(g_pid_reg->meas[channelu].o & 0x3FFF);
 				if (pid_out_before_relock[channel] & (1<<13)) {
 					//value is negative. We need to fill all other bits on the left with ones as yet it is signed 14-bit value
 					pid_out_before_relock[channel] |= (uint32_t) (~0x3FFF);
 				}
+
+				//step one: resetting pid integrator (to prevent it from interfering in relocking proccess)
+				g_pid_reg->pid[(channel == 0) ? 2 : 1].ki = 0;
+				g_pid_reg->pid[(channel == 0) ? 2 : 1].kii = 0;
+				//g_pid_reg->configuration = (pid_configuration | (1 <<  ((channel == 0) ? 0 : 3)));
 				
 				
 				
 				offs = real_offset[channel];
 				
-				up = pid[(channel == 0) ? 0 : 3].limit_up;
-				low = pid[(channel == 0) ? 0 : 3].limit_low;
+				up = pid[(channel == 0) ? 2 : 1].limit_up;
+				low = pid[(channel == 0) ? 2 : 1].limit_low;
 				
 				//step three: starting generator from the initial position of the pid controller scanning all with triangles
 				start_relocking_generation(channel, pid_out_before_relock[channel]+offs, low/max_cnt,up/max_cnt);
-				//if (channel == 0) g_pid_reg->out_1_offset = 0; else g_pid_reg->out_2_offset = 0;
-              			/*fd = fopen("/opt/redpitaya/www/apps/pid2/debug.txt", "a");
-              			fprintf(fd, "Starting generator %d!\nout: %d, min: %f, max: %f\n", channel+1,pid_out_before_relock[channel], (low)/max_cnt,(up)/max_cnt);
-              			fclose(fd);*/	
+	
                			locked[channel]++;
 			} 
 			if (locked[channel] <= RELOCK_TIMEOUT) locked[channel]++;
 		}
 	}
-	
-	//here is power logging
-	
-	if ((pid_enabled[0] != 0) && (pid_enabled[1] != 0) && (enable_log != 0) && (channel == 0)){
-		for (i=0; i<2; i++){
-			rp_AIpinGetValue(i+2, &intensity2);
-			photodetectors_log[i] += intensity2 - xadc_offset[i];
-		}
-		log_timer++;
-		if (log_timer >= LOG_PERIOD){
-			fd = fopen("/opt/redpitaya/www/apps/pid2/power_log.txt", "a");
-			fprintf(fd, "%.3f\t%.3f\r\n", photodetectors_log[0]/LOG_PERIOD, photodetectors_log[1]/LOG_PERIOD);
-			fclose(fd);
-			photodetectors_log[0] = 0.0;
-			photodetectors_log[1] = 0.0;
-			log_timer=0;
-		}
-	}
-	
 	return intensity; // threshold_reached;
 }
