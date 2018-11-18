@@ -513,7 +513,7 @@ void start_relocking_generation(int channel, int32_t start, float min, float max
 	awg_param_t ch_params;
 	//synthesising signal
 	synthesize_signal(max-min,
-                          1,
+                          0.1,
                           (channel == 1) ? gen_calib_params->be_ch1_dc_offs : gen_calib_params->be_ch2_dc_offs,
                           (channel == 1) ? gen_calib_params->be_ch1_fs : gen_calib_params->be_ch2_fs,
                           (channel == 1) ? ch1_max_dac_v : ch2_max_dac_v,
