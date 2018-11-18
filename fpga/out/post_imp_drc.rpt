@@ -1,7 +1,7 @@
 Copyright 1986-2015 Xilinx, Inc. All Rights Reserved.
 ------------------------------------------------------------------------------------
 | Tool Version : Vivado v.2015.4 (lin64) Build 1412921 Wed Nov 18 09:44:32 MST 2015
-| Date         : Sun Nov 18 01:39:42 2018
+| Date         : Sun Nov 18 15:15:18 2018
 | Host         : ilyich-VirtualBox running 64-bit Ubuntu 16.04.5 LTS
 | Command      : report_drc
 ------------------------------------------------------------------------------------
@@ -20,7 +20,7 @@ Table of Contents
       Design limits: <entire design considered>
            Ruledeck: default
              Max violations: <unlimited>
-             Violations found: 127
+             Violations found: 125
 
 2. REPORT DETAILS
 -----------------
@@ -96,22 +96,22 @@ Related violations: <none>
 
 DPIP-1#11 Warning
 Input pipelining  
-DSP i_pid2/i_pid11/kp_mult20 input i_pid2/i_pid11/kp_mult20/B[17:0] is not pipelined. Pipelining DSP48 input will improve performance.
+DSP i_pid2/i_pid11/kp_mult20 input i_pid2/i_pid11/kp_mult20/A[29:0] is not pipelined. Pipelining DSP48 input will improve performance.
 Related violations: <none>
 
 DPIP-1#12 Warning
 Input pipelining  
-DSP i_pid2/i_pid12/dat2 input i_pid2/i_pid12/dat2/A[29:0] is not pipelined. Pipelining DSP48 input will improve performance.
+DSP i_pid2/i_pid11/kp_mult20 input i_pid2/i_pid11/kp_mult20/B[17:0] is not pipelined. Pipelining DSP48 input will improve performance.
 Related violations: <none>
 
 DPIP-1#13 Warning
 Input pipelining  
-DSP i_pid2/i_pid12/dat2 input i_pid2/i_pid12/dat2/B[17:0] is not pipelined. Pipelining DSP48 input will improve performance.
+DSP i_pid2/i_pid12/dat2 input i_pid2/i_pid12/dat2/A[29:0] is not pipelined. Pipelining DSP48 input will improve performance.
 Related violations: <none>
 
 DPIP-1#14 Warning
 Input pipelining  
-DSP i_pid2/i_pid12/kd_mult input i_pid2/i_pid12/kd_mult/A[29:0] is not pipelined. Pipelining DSP48 input will improve performance.
+DSP i_pid2/i_pid12/dat2 input i_pid2/i_pid12/dat2/B[17:0] is not pipelined. Pipelining DSP48 input will improve performance.
 Related violations: <none>
 
 DPIP-1#15 Warning
@@ -136,105 +136,100 @@ Related violations: <none>
 
 DPIP-1#19 Warning
 Input pipelining  
-DSP i_pid2/i_pid12/kp_mult20 input i_pid2/i_pid12/kp_mult20/A[29:0] is not pipelined. Pipelining DSP48 input will improve performance.
+DSP i_pid2/i_pid12/kp_mult20 input i_pid2/i_pid12/kp_mult20/B[17:0] is not pipelined. Pipelining DSP48 input will improve performance.
 Related violations: <none>
 
 DPIP-1#20 Warning
 Input pipelining  
-DSP i_pid2/i_pid12/kp_mult20 input i_pid2/i_pid12/kp_mult20/B[17:0] is not pipelined. Pipelining DSP48 input will improve performance.
+DSP i_pid2/i_pid21/dat2 input i_pid2/i_pid21/dat2/A[29:0] is not pipelined. Pipelining DSP48 input will improve performance.
 Related violations: <none>
 
 DPIP-1#21 Warning
 Input pipelining  
-DSP i_pid2/i_pid21/dat2 input i_pid2/i_pid21/dat2/A[29:0] is not pipelined. Pipelining DSP48 input will improve performance.
+DSP i_pid2/i_pid21/dat2 input i_pid2/i_pid21/dat2/B[17:0] is not pipelined. Pipelining DSP48 input will improve performance.
 Related violations: <none>
 
 DPIP-1#22 Warning
 Input pipelining  
-DSP i_pid2/i_pid21/dat2 input i_pid2/i_pid21/dat2/B[17:0] is not pipelined. Pipelining DSP48 input will improve performance.
+DSP i_pid2/i_pid21/kd_mult input i_pid2/i_pid21/kd_mult/B[17:0] is not pipelined. Pipelining DSP48 input will improve performance.
 Related violations: <none>
 
 DPIP-1#23 Warning
 Input pipelining  
-DSP i_pid2/i_pid21/kd_mult input i_pid2/i_pid21/kd_mult/B[17:0] is not pipelined. Pipelining DSP48 input will improve performance.
+DSP i_pid2/i_pid21/ki_mult0 input i_pid2/i_pid21/ki_mult0/B[17:0] is not pipelined. Pipelining DSP48 input will improve performance.
 Related violations: <none>
 
 DPIP-1#24 Warning
 Input pipelining  
-DSP i_pid2/i_pid21/ki_mult0 input i_pid2/i_pid21/ki_mult0/A[29:0] is not pipelined. Pipelining DSP48 input will improve performance.
+DSP i_pid2/i_pid21/ki_mult_20 input i_pid2/i_pid21/ki_mult_20/A[29:0] is not pipelined. Pipelining DSP48 input will improve performance.
 Related violations: <none>
 
 DPIP-1#25 Warning
 Input pipelining  
-DSP i_pid2/i_pid21/ki_mult0 input i_pid2/i_pid21/ki_mult0/B[17:0] is not pipelined. Pipelining DSP48 input will improve performance.
+DSP i_pid2/i_pid21/ki_mult_20 input i_pid2/i_pid21/ki_mult_20/B[17:0] is not pipelined. Pipelining DSP48 input will improve performance.
 Related violations: <none>
 
 DPIP-1#26 Warning
 Input pipelining  
-DSP i_pid2/i_pid21/ki_mult_20 input i_pid2/i_pid21/ki_mult_20/A[29:0] is not pipelined. Pipelining DSP48 input will improve performance.
+DSP i_pid2/i_pid21/kp_mult20 input i_pid2/i_pid21/kp_mult20/B[17:0] is not pipelined. Pipelining DSP48 input will improve performance.
 Related violations: <none>
 
 DPIP-1#27 Warning
 Input pipelining  
-DSP i_pid2/i_pid21/ki_mult_20 input i_pid2/i_pid21/ki_mult_20/B[17:0] is not pipelined. Pipelining DSP48 input will improve performance.
+DSP i_pid2/i_pid22/dat2 input i_pid2/i_pid22/dat2/A[29:0] is not pipelined. Pipelining DSP48 input will improve performance.
 Related violations: <none>
 
 DPIP-1#28 Warning
 Input pipelining  
-DSP i_pid2/i_pid21/kp_mult20 input i_pid2/i_pid21/kp_mult20/A[29:0] is not pipelined. Pipelining DSP48 input will improve performance.
+DSP i_pid2/i_pid22/dat2 input i_pid2/i_pid22/dat2/B[17:0] is not pipelined. Pipelining DSP48 input will improve performance.
 Related violations: <none>
 
 DPIP-1#29 Warning
 Input pipelining  
-DSP i_pid2/i_pid21/kp_mult20 input i_pid2/i_pid21/kp_mult20/B[17:0] is not pipelined. Pipelining DSP48 input will improve performance.
+DSP i_pid2/i_pid22/kd_mult input i_pid2/i_pid22/kd_mult/A[29:0] is not pipelined. Pipelining DSP48 input will improve performance.
 Related violations: <none>
 
 DPIP-1#30 Warning
 Input pipelining  
-DSP i_pid2/i_pid22/dat2 input i_pid2/i_pid22/dat2/A[29:0] is not pipelined. Pipelining DSP48 input will improve performance.
+DSP i_pid2/i_pid22/kd_mult input i_pid2/i_pid22/kd_mult/B[17:0] is not pipelined. Pipelining DSP48 input will improve performance.
 Related violations: <none>
 
 DPIP-1#31 Warning
 Input pipelining  
-DSP i_pid2/i_pid22/dat2 input i_pid2/i_pid22/dat2/B[17:0] is not pipelined. Pipelining DSP48 input will improve performance.
+DSP i_pid2/i_pid22/ki_mult0 input i_pid2/i_pid22/ki_mult0/A[29:0] is not pipelined. Pipelining DSP48 input will improve performance.
 Related violations: <none>
 
 DPIP-1#32 Warning
 Input pipelining  
-DSP i_pid2/i_pid22/kd_mult input i_pid2/i_pid22/kd_mult/B[17:0] is not pipelined. Pipelining DSP48 input will improve performance.
+DSP i_pid2/i_pid22/ki_mult0 input i_pid2/i_pid22/ki_mult0/B[17:0] is not pipelined. Pipelining DSP48 input will improve performance.
 Related violations: <none>
 
 DPIP-1#33 Warning
 Input pipelining  
-DSP i_pid2/i_pid22/ki_mult0 input i_pid2/i_pid22/ki_mult0/A[29:0] is not pipelined. Pipelining DSP48 input will improve performance.
+DSP i_pid2/i_pid22/ki_mult_20 input i_pid2/i_pid22/ki_mult_20/A[29:0] is not pipelined. Pipelining DSP48 input will improve performance.
 Related violations: <none>
 
 DPIP-1#34 Warning
 Input pipelining  
-DSP i_pid2/i_pid22/ki_mult0 input i_pid2/i_pid22/ki_mult0/B[17:0] is not pipelined. Pipelining DSP48 input will improve performance.
+DSP i_pid2/i_pid22/ki_mult_20 input i_pid2/i_pid22/ki_mult_20/B[17:0] is not pipelined. Pipelining DSP48 input will improve performance.
 Related violations: <none>
 
 DPIP-1#35 Warning
 Input pipelining  
-DSP i_pid2/i_pid22/ki_mult_20 input i_pid2/i_pid22/ki_mult_20/A[29:0] is not pipelined. Pipelining DSP48 input will improve performance.
+DSP i_pid2/i_pid22/kp_mult20 input i_pid2/i_pid22/kp_mult20/A[29:0] is not pipelined. Pipelining DSP48 input will improve performance.
 Related violations: <none>
 
 DPIP-1#36 Warning
 Input pipelining  
-DSP i_pid2/i_pid22/ki_mult_20 input i_pid2/i_pid22/ki_mult_20/B[17:0] is not pipelined. Pipelining DSP48 input will improve performance.
+DSP i_pid2/i_pid22/kp_mult20 input i_pid2/i_pid22/kp_mult20/B[17:0] is not pipelined. Pipelining DSP48 input will improve performance.
 Related violations: <none>
 
 DPIP-1#37 Warning
 Input pipelining  
-DSP i_pid2/i_pid22/kp_mult20 input i_pid2/i_pid22/kp_mult20/B[17:0] is not pipelined. Pipelining DSP48 input will improve performance.
-Related violations: <none>
-
-DPIP-1#38 Warning
-Input pipelining  
 DSP i_scope/i_dfilt1_cha/bb_mult input i_scope/i_dfilt1_cha/bb_mult/B[17:0] is not pipelined. Pipelining DSP48 input will improve performance.
 Related violations: <none>
 
-DPIP-1#39 Warning
+DPIP-1#38 Warning
 Input pipelining  
 DSP i_scope/i_dfilt1_chb/bb_mult input i_scope/i_dfilt1_chb/bb_mult/B[17:0] is not pipelined. Pipelining DSP48 input will improve performance.
 Related violations: <none>
@@ -692,27 +687,22 @@ Related violations: <none>
 
 REQP-20#3 Advisory
 enum_AREG_0_connects_CEA1_GND_connects_CEA2_GND  
-i_pid2/i_pid12/kd_mult: When DSP48E1 attribute AREG is set to 0, the CEA1 and CEA2 pins should be tied to GND to save power.
+i_pid2/i_pid11/kp_mult20: When DSP48E1 attribute AREG is set to 0, the CEA1 and CEA2 pins should be tied to GND to save power.
 Related violations: <none>
 
 REQP-20#4 Advisory
 enum_AREG_0_connects_CEA1_GND_connects_CEA2_GND  
-i_pid2/i_pid12/kp_mult20: When DSP48E1 attribute AREG is set to 0, the CEA1 and CEA2 pins should be tied to GND to save power.
+i_pid2/i_pid22/kd_mult: When DSP48E1 attribute AREG is set to 0, the CEA1 and CEA2 pins should be tied to GND to save power.
 Related violations: <none>
 
 REQP-20#5 Advisory
 enum_AREG_0_connects_CEA1_GND_connects_CEA2_GND  
-i_pid2/i_pid21/ki_mult0: When DSP48E1 attribute AREG is set to 0, the CEA1 and CEA2 pins should be tied to GND to save power.
+i_pid2/i_pid22/ki_mult0: When DSP48E1 attribute AREG is set to 0, the CEA1 and CEA2 pins should be tied to GND to save power.
 Related violations: <none>
 
 REQP-20#6 Advisory
 enum_AREG_0_connects_CEA1_GND_connects_CEA2_GND  
-i_pid2/i_pid21/kp_mult20: When DSP48E1 attribute AREG is set to 0, the CEA1 and CEA2 pins should be tied to GND to save power.
-Related violations: <none>
-
-REQP-20#7 Advisory
-enum_AREG_0_connects_CEA1_GND_connects_CEA2_GND  
-i_pid2/i_pid22/ki_mult0: When DSP48E1 attribute AREG is set to 0, the CEA1 and CEA2 pins should be tied to GND to save power.
+i_pid2/i_pid22/kp_mult20: When DSP48E1 attribute AREG is set to 0, the CEA1 and CEA2 pins should be tied to GND to save power.
 Related violations: <none>
 
 

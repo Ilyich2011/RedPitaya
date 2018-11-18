@@ -1,7 +1,7 @@
 Copyright 1986-2015 Xilinx, Inc. All Rights Reserved.
 ----------------------------------------------------------------------------------------
 | Tool Version     : Vivado v.2015.4 (lin64) Build 1412921 Wed Nov 18 09:44:32 MST 2015
-| Date             : Sun Nov 18 01:39:39 2018
+| Date             : Sun Nov 18 15:15:15 2018
 | Host             : ilyich-VirtualBox running 64-bit Ubuntu 16.04.5 LTS
 | Command          : 
 | Design           : red_pitaya_top
@@ -30,12 +30,12 @@ Table of Contents
 ----------
 
 +--------------------------+-------+
-| Total On-Chip Power (W)  | 2.105 |
-| Dynamic (W)              | 1.958 |
+| Total On-Chip Power (W)  | 2.102 |
+| Dynamic (W)              | 1.955 |
 | Device Static (W)        | 0.147 |
 | Effective TJA (C/W)      | 11.5  |
-| Max Ambient (C)          | 60.7  |
-| Junction Temperature (C) | 49.3  |
+| Max Ambient (C)          | 60.8  |
+| Junction Temperature (C) | 49.2  |
 | Confidence Level         | Low   |
 | Setting File             | ---   |
 | Simulation Activity File | ---   |
@@ -49,24 +49,24 @@ Table of Contents
 +--------------------------+-----------+----------+-----------+-----------------+
 | On-Chip                  | Power (W) | Used     | Available | Utilization (%) |
 +--------------------------+-----------+----------+-----------+-----------------+
-| Clocks                   |     0.038 |       14 |       --- |             --- |
-| Slice Logic              |     0.041 |    14944 |       --- |             --- |
-|   LUT as Logic           |     0.034 |     5843 |     17600 |           33.20 |
+| Clocks                   |     0.039 |       14 |       --- |             --- |
+| Slice Logic              |     0.040 |    14896 |       --- |             --- |
+|   LUT as Logic           |     0.034 |     5835 |     17600 |           33.15 |
 |   CARRY4                 |     0.004 |      669 |      4400 |           15.20 |
-|   Register               |     0.002 |     6180 |     35200 |           17.56 |
+|   Register               |     0.002 |     6150 |     35200 |           17.47 |
 |   LUT as Distributed RAM |    <0.001 |      160 |      6000 |            2.67 |
 |   F7/F8 Muxes            |    <0.001 |       49 |     17600 |            0.28 |
 |   LUT as Shift Register  |    <0.001 |       63 |      6000 |            1.05 |
 |   Others                 |     0.000 |      273 |       --- |             --- |
-| Signals                  |     0.059 |    11907 |       --- |             --- |
+| Signals                  |     0.056 |    11857 |       --- |             --- |
 | Block RAM                |     0.100 |       30 |        60 |           50.00 |
 | PLL                      |     0.097 |        1 |         2 |           50.00 |
-| DSPs                     |     0.040 |       32 |        80 |           40.00 |
+| DSPs                     |     0.039 |       32 |        80 |           40.00 |
 | I/O                      |     0.288 |       93 |       100 |           93.00 |
 | XADC                     |     0.004 |        1 |       --- |             --- |
 | PS7                      |     1.292 |        1 |       --- |             --- |
 | Static Power             |     0.147 |          |           |                 |
-| Total                    |     2.105 |          |           |                 |
+| Total                    |     2.102 |          |           |                 |
 +--------------------------+-----------+----------+-----------+-----------------+
 
 
@@ -76,7 +76,7 @@ Table of Contents
 +-----------+-------------+-----------+-------------+------------+
 | Source    | Voltage (V) | Total (A) | Dynamic (A) | Static (A) |
 +-----------+-------------+-----------+-------------+------------+
-| Vccint    |       1.000 |     0.284 |       0.275 |      0.010 |
+| Vccint    |       1.000 |     0.282 |       0.272 |      0.010 |
 | Vccaux    |       1.800 |     0.069 |       0.057 |      0.012 |
 | Vcco33    |       3.300 |     0.085 |       0.084 |      0.001 |
 | Vcco25    |       2.500 |     0.001 |       0.000 |      0.001 |
@@ -160,12 +160,12 @@ Table of Contents
 +----------------------------------------------------------------------------------+-----------+
 | Name                                                                             | Power (W) |
 +----------------------------------------------------------------------------------+-----------+
-| red_pitaya_top                                                                   |     1.958 |
+| red_pitaya_top                                                                   |     1.955 |
 |   i_ams                                                                          |    <0.001 |
 |   i_asg                                                                          |     0.080 |
 |     ch[0]                                                                        |     0.038 |
-|     ch[1]                                                                        |     0.039 |
-|   i_hk                                                                           |    <0.001 |
+|     ch[1]                                                                        |     0.038 |
+|   i_hk                                                                           |     0.001 |
 |   i_iobufn[0]                                                                    |    <0.001 |
 |   i_iobufn[1]                                                                    |    <0.001 |
 |   i_iobufn[2]                                                                    |    <0.001 |
@@ -182,15 +182,15 @@ Table of Contents
 |   i_iobufp[5]                                                                    |    <0.001 |
 |   i_iobufp[6]                                                                    |    <0.001 |
 |   i_iobufp[7]                                                                    |    <0.001 |
-|   i_pid2                                                                         |     0.077 |
+|   i_pid2                                                                         |     0.075 |
 |     i_pid11                                                                      |     0.017 |
-|     i_pid12                                                                      |     0.018 |
-|     i_pid21                                                                      |     0.017 |
+|     i_pid12                                                                      |     0.016 |
+|     i_pid21                                                                      |     0.016 |
 |     i_pid22                                                                      |     0.017 |
 |     i_quad_dec                                                                   |    <0.001 |
 |     i_rot_enc_1                                                                  |    <0.001 |
 |     i_rot_enc_2                                                                  |    <0.001 |
-|   i_ps                                                                           |     1.319 |
+|   i_ps                                                                           |     1.320 |
 |     axi_master[0]                                                                |     0.002 |
 |       axi_awfifo_reg_0_15_0_5                                                    |    <0.001 |
 |       axi_awfifo_reg_0_15_12_17                                                  |    <0.001 |
@@ -234,11 +234,11 @@ Table of Contents
 |       axi_wfifo_reg_0_15_6_11                                                    |    <0.001 |
 |       axi_wfifo_reg_0_15_72_72                                                   |    <0.001 |
 |     axi_slave_gp0                                                                |     0.002 |
-|     system_i                                                                     |     1.312 |
-|       system_i                                                                   |     1.312 |
-|         axi_protocol_converter_0                                                 |     0.011 |
-|           inst                                                                   |     0.011 |
-|             gen_axilite.gen_b2s_conv.axilite_b2s                                 |     0.011 |
+|     system_i                                                                     |     1.313 |
+|       system_i                                                                   |     1.313 |
+|         axi_protocol_converter_0                                                 |     0.012 |
+|           inst                                                                   |     0.012 |
+|             gen_axilite.gen_b2s_conv.axilite_b2s                                 |     0.012 |
 |               MI_REG                                                             |     0.000 |
 |                 ar_pipe                                                          |     0.000 |
 |                 aw_pipe                                                          |     0.000 |
@@ -257,7 +257,7 @@ Table of Contents
 |                 transaction_fifo_0                                               |    <0.001 |
 |               SI_REG                                                             |     0.003 |
 |                 ar_pipe                                                          |    <0.001 |
-|                 aw_pipe                                                          |    <0.001 |
+|                 aw_pipe                                                          |     0.001 |
 |                 axi_infrastructure_v1_1_0_axi2vector_0                           |     0.000 |
 |                 axi_infrastructure_v1_1_0_vector2axi_0                           |     0.000 |
 |                 b_pipe                                                           |    <0.001 |
@@ -316,7 +316,7 @@ Table of Contents
 |             AXI_XADC_CORE_I                                                      |     0.005 |
 |             INTR_CTRLR_GEN_I.INTERRUPT_CONTROL_I                                 |    <0.001 |
 |             SOFT_RESET_I                                                         |    <0.001 |
-|   i_scope                                                                        |     0.078 |
+|   i_scope                                                                        |     0.079 |
 |     i_dfilt1_cha                                                                 |     0.009 |
 |     i_dfilt1_chb                                                                 |     0.009 |
 |     i_wr0                                                                        |     0.005 |

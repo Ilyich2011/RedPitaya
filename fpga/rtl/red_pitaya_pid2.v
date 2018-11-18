@@ -152,7 +152,7 @@ i_pid12 (
    // data
   .clk_i        (  clk_i          ),  // clock
   .rstn_i       (  rstn_i         ),  // reset - active low
-  .dat_i        (  dat_b_i        ),  // input data
+  .dat_i        (  meas_22_i      ),  // input data   //Now it takes integral output part from pid22 -- Zalivako
   .dat_o        (  pid_12_out     ),  // output data
   .meas_p_i     (  meas_12_p      ),  // bar graph  ----------------- Fenske
   .meas_i_i     (  meas_12_i      ),
@@ -201,7 +201,7 @@ i_pid21 (
    // data
   .clk_i        (  clk_i          ),  // clock
   .rstn_i       (  rstn_i         ),  // reset - active low
-  .dat_i        (  dat_a_i        ),  // input data
+  .dat_i        (  meas_11_i      ),  // input data    //Now it takes integral output part from pid11 -- Zalivako
   .dat_o        (  pid_21_out     ),  // output data
   .meas_p_i     (  meas_21_p      ),  // bar graph  ----------------- Fenske
   .meas_i_i     (  meas_21_i      ),
